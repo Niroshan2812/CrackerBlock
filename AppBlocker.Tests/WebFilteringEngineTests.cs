@@ -53,6 +53,22 @@ namespace AppBlocker.Tests
         }
 
         [Fact]
+        public void ExpandDomain_ExpandsSubdomainsAndKnownClusters()
+        {
+            var wikiExpanded = WebFilteringEngine.ExpandDomain("wikipedia.org").ToList();
+            Assert.Contains("wikipedia.org", wikiExpanded);
+            Assert.Contains("en.wikipedia.org", wikiExpanded);
+            Assert.Contains("www.wikipedia.org", wikiExpanded);
+            Assert.Contains("m.wikipedia.org", wikiExpanded);
+
+            var ytExpanded = WebFilteringEngine.ExpandDomain("https://www.youtube.com/watch?v=LE0EOJCMIpI").ToList();
+            Assert.Contains("youtube.com", ytExpanded);
+            Assert.Contains("www.youtube.com", ytExpanded);
+            Assert.Contains("googlevideo.com", ytExpanded);
+            Assert.Contains("m.youtube.com", ytExpanded);
+        }
+
+        [Fact]
         public async Task ApplyRules_AppendsManagedBlockWithIpv4AndIpv6_AndPreservesOriginalContent()
         {
             var engine = new WebFilteringEngine(_testHostsFile);

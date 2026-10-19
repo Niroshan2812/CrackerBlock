@@ -73,19 +73,9 @@ namespace AppBlocker.Core.Enforcement
                             {
                                 if (ScheduleTypes.IsRuleCurrentlyActive(rule.ScheduleType, now))
                                 {
-                                    var cleaned = NormalizeDomain(rule.UrlOrKeyword);
-                                    if (!string.IsNullOrEmpty(cleaned))
+                                    foreach (var domain in ExpandDomain(rule.UrlOrKeyword))
                                     {
-                                        activeDomains.Add(cleaned);
-                                        // Also add www. prefix or stripped prefix
-                                        if (cleaned.StartsWith("www.", StringComparison.OrdinalIgnoreCase))
-                                        {
-                                            activeDomains.Add(cleaned.Substring(4));
-                                        }
-                                        else
-                                        {
-                                            activeDomains.Add("www." + cleaned);
-                                        }
+                                        activeDomains.Add(domain);
                                     }
                                 }
                             }
@@ -195,6 +185,7 @@ namespace AppBlocker.Core.Enforcement
                     newLines.Add(BlockHeader);
                     foreach (var domain in blockedDomains.OrderBy(d => d))
                     {
+                        newLines.Add($"0.0.0.0 {domain}");
                         newLines.Add($"127.0.0.1 {domain}");
                         newLines.Add($"::1 {domain}");
                     }
@@ -248,6 +239,111 @@ namespace AppBlocker.Core.Enforcement
             }
 
             return clean.Trim('.');
+        }
+
+        private static readonly Dictionary<string, string[]> KnownServiceDomainClusters = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["youtube.com"] = new[]
+            {
+                "youtube.com", "www.youtube.com", "m.youtube.com", "youtu.be",
+                "youtube-nocookie.com", "www.youtube-nocookie.com",
+                "youtubei.googleapis.com", "googlevideo.com", "www.googlevideo.com",
+                "ytimg.com", "www.ytimg.com", "i.ytimg.com", "s.ytimg.com"
+            },
+            ["wikipedia.org"] = new[]
+            {
+                "wikipedia.org", "www.wikipedia.org", "en.wikipedia.org",
+                "m.wikipedia.org", "mobile.wikipedia.org", "wikimedia.org", "www.wikimedia.org"
+            },
+            ["reddit.com"] = new[]
+            {
+                "reddit.com", "www.reddit.com", "old.reddit.com", "new.reddit.com",
+                "v.redd.it", "i.redd.it", "redditmedia.com"
+            },
+            ["twitter.com"] = new[]
+            {
+                "twitter.com", "www.twitter.com", "x.com", "www.x.com",
+                "mobile.twitter.com", "api.twitter.com", "t.co"
+            },
+            ["x.com"] = new[]
+            {
+                "twitter.com", "www.twitter.com", "x.com", "www.x.com",
+                "mobile.twitter.com", "api.twitter.com", "t.co"
+            },
+            ["facebook.com"] = new[]
+            {
+                "facebook.com", "www.facebook.com", "m.facebook.com", "fb.com", "www.fb.com", "fbcdn.net"
+            },
+            ["instagram.com"] = new[]
+            {
+                "instagram.com", "www.instagram.com", "m.instagram.com", "cdninstagram.com"
+            },
+            ["tiktok.com"] = new[]
+            {
+                "tiktok.com", "www.tiktok.com", "m.tiktok.com", "v16-webapp.tiktok.com"
+            },
+            ["twitch.tv"] = new[]
+            {
+                "twitch.tv", "www.twitch.tv", "m.twitch.tv"
+            },
+            ["netflix.com"] = new[]
+            {
+                "netflix.com", "www.netflix.com"
+            }
+        };
+
+        public static IEnumerable<string> ExpandDomain(string rawInput)
+        {
+            var cleaned = NormalizeDomain(rawInput);
+            if (string.IsNullOrEmpty(cleaned))
+            {
+                yield break;
+            }
+
+            var results = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            results.Add(cleaned);
+
+            // Determine root/base domain (e.g. "en.wikipedia.org" -> "wikipedia.org")
+            var parts = cleaned.Split('.');
+            string baseDomain = cleaned;
+            if (parts.Length >= 2)
+            {
+                int take = 2;
+                if (parts.Length >= 3 && (parts[^2].Equals("co", StringComparison.OrdinalIgnoreCase) ||
+                                          parts[^2].Equals("com", StringComparison.OrdinalIgnoreCase) ||
+                                          parts[^2].Equals("org", StringComparison.OrdinalIgnoreCase) ||
+                                          parts[^2].Equals("net", StringComparison.OrdinalIgnoreCase) ||
+                                          parts[^2].Equals("gov", StringComparison.OrdinalIgnoreCase) ||
+                                          parts[^2].Equals("edu", StringComparison.OrdinalIgnoreCase)))
+                {
+                    take = 3;
+                }
+                baseDomain = string.Join(".", parts.TakeLast(Math.Min(take, parts.Length)));
+            }
+
+            results.Add(baseDomain);
+
+            if (KnownServiceDomainClusters.TryGetValue(baseDomain, out var cluster))
+            {
+                foreach (var d in cluster)
+                {
+                    results.Add(d);
+                }
+            }
+
+            // Standard common subdomains
+            results.Add("www." + baseDomain);
+            results.Add("m." + baseDomain);
+            results.Add("mobile." + baseDomain);
+            results.Add("app." + baseDomain);
+            results.Add("web." + baseDomain);
+            results.Add("api." + baseDomain);
+            results.Add("en." + baseDomain);
+
+            foreach (var r in results)
+            {
+                yield return r;
+            }
         }
 
         public static bool FlushDnsCache()
