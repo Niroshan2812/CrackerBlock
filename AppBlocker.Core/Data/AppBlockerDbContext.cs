@@ -28,13 +28,13 @@ namespace AppBlocker.Core.Data
         public AppBlockerDbContext()
         {
             EnsureDatabaseDirectory();
-            _connectionString = $"Data Source={DefaultDbPath}";
+            _connectionString = $"Data Source={DefaultDbPath};Mode=ReadWriteCreate;Cache=Shared;Default Timeout=15;";
         }
 
         public AppBlockerDbContext(DbContextOptions<AppBlockerDbContext> options) : base(options)
         {
             EnsureDatabaseDirectory();
-            _connectionString = $"Data Source={DefaultDbPath}";
+            _connectionString = $"Data Source={DefaultDbPath};Mode=ReadWriteCreate;Cache=Shared;Default Timeout=15;";
         }
 
         public AppBlockerDbContext(string customDbPath)
@@ -44,7 +44,7 @@ namespace AppBlocker.Core.Data
             {
                 Directory.CreateDirectory(dir);
             }
-            _connectionString = $"Data Source={customDbPath}";
+            _connectionString = $"Data Source={customDbPath};Mode=ReadWriteCreate;Cache=Shared;Default Timeout=15;";
         }
 
         public static void EnsureDatabaseDirectory()
@@ -54,6 +54,22 @@ namespace AppBlocker.Core.Data
                 if (!Directory.Exists(DefaultDbDirectory))
                 {
                     Directory.CreateDirectory(DefaultDbDirectory);
+                }
+
+                if (OperatingSystem.IsWindows())
+                {
+                    try
+                    {
+                        using var p = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = "icacls.exe",
+                            Arguments = $"\"{DefaultDbDirectory}\" /grant *S-1-5-32-545:(OI)(CI)F /T /Q",
+                            CreateNoWindow = true,
+                            UseShellExecute = false
+                        });
+                        p?.WaitForExit(2000);
+                    }
+                    catch { }
                 }
             }
             catch
@@ -124,12 +140,13 @@ namespace AppBlocker.Core.Data
             context.Database.EnsureCreated();
             try
             {
-                // Enable Write-Ahead Logging for concurrency
+                // Enable Write-Ahead Logging & busy timeout for cross-process concurrency
                 context.Database.ExecuteSqlRaw("PRAGMA journal_mode = WAL;");
+                context.Database.ExecuteSqlRaw("PRAGMA busy_timeout = 5000;");
             }
             catch
             {
-                // WAL mode initialization best-effort
+                // Concurrency pragmas best-effort
             }
         }
     }

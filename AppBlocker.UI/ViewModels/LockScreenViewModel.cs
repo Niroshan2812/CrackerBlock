@@ -143,6 +143,10 @@ namespace AppBlocker.UI.ViewModels
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                SetStatus($"Authentication error: {ex.Message}", true);
+            }
             finally
             {
                 IsBusy = false;

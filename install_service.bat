@@ -23,7 +23,12 @@ echo [2/3] Configuring Watchdog and Crash Auto-Recovery...
 sc.exe failure "%SERVICE_NAME%" reset= 86400 actions= restart/5000/restart/5000/restart/5000
 sc.exe failureflag "%SERVICE_NAME%" 1
 
-echo [3/3] Starting %SERVICE_NAME%...
+echo [3/4] Configuring Database ACL Permissions for UI/Service Concurrency...
+if not exist "%ProgramData%\AppBlocker" mkdir "%ProgramData%\AppBlocker"
+icacls "%ProgramData%\AppBlocker" /grant "*S-1-5-32-545:(OI)(CI)F" /T /Q >nul 2>&1
+icacls "%ProgramData%\AppBlocker" /grant "*S-1-1-0:(OI)(CI)F" /T /Q >nul 2>&1
+
+echo [4/4] Starting %SERVICE_NAME%...
 sc.exe start "%SERVICE_NAME%"
 
 echo.

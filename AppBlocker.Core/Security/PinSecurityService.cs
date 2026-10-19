@@ -119,7 +119,15 @@ namespace AppBlocker.Core.Security
                 });
             }
 
-            await db.SaveChangesAsync();
+            try
+            {
+                await db.SaveChangesAsync();
+            }
+            catch
+            {
+                // Best-effort audit logging; database write issues must never crash or block authentication
+            }
+
             return isValid;
         }
 

@@ -62,9 +62,16 @@ namespace AppBlocker.UI.ViewModels
 
         private async void OnAuthenticated()
         {
-            IsAuthenticated = true;
-            SelectedTabIndex = 0;
-            await AppsVM.LoadRulesAsync();
+            try
+            {
+                IsAuthenticated = true;
+                SelectedTabIndex = 0;
+                await AppsVM.LoadRulesAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Auth transition error: {ex.Message}");
+            }
         }
 
         partial void OnSelectedTabIndexChanged(int value)
