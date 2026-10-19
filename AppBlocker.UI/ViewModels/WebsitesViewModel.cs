@@ -126,6 +126,9 @@ namespace AppBlocker.UI.ViewModels
                 // Send IPC message to Worker Service to update proxy filtering engine immediately
                 var ipcResp = await _ipcClient.AddWebRuleAsync(cleanDomain, SelectedSchedule, redirect);
 
+                // Ensure local user WinINet proxy settings are active and refreshed
+                HttpsProxyFilteringEngine.ConfigureWindowsProxy(enable: true);
+
                 SetStatus(string.IsNullOrWhiteSpace(redirect)
                     ? $"Domain '{cleanDomain}' blocked! Service: {ipcResp.Message}"
                     : $"Domain '{cleanDomain}' redirected to '{redirect}'! Service: {ipcResp.Message}", true);

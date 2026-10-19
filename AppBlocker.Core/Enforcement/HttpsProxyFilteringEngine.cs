@@ -3,10 +3,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using AppBlocker.Core.Data;
 using AppBlocker.Core.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Win32;
 using Titanium.Web.Proxy;
 using Titanium.Web.Proxy.EventArguments;
 using Titanium.Web.Proxy.Http;
@@ -25,7 +27,22 @@ namespace AppBlocker.Core.Enforcement
         private bool _isRunning = false;
         private bool _disposed = false;
 
-        public bool IsPaused { get; set; } = false;
+        private bool _isPaused = false;
+        public bool IsPaused
+        {
+            get => _isPaused;
+            set
+            {
+                if (_isPaused != value)
+                {
+                    _isPaused = value;
+                    if (_isRunning)
+                    {
+                        ConfigureWindowsProxy(enable: !_isPaused, $"127.0.0.1:{_proxyPort}");
+                    }
+                }
+            }
+        }
 
         public event Action<string, string?>? WebAccessIntercepted;
 
@@ -90,6 +107,9 @@ namespace AppBlocker.Core.Enforcement
                 _proxyServer.SetAsSystemHttpProxy(_explicitEndPoint);
                 _proxyServer.SetAsSystemHttpsProxy(_explicitEndPoint);
 
+                // Configure Windows registry proxy for all user profiles & HKLM (essential when running as a SYSTEM service)
+                ConfigureWindowsProxy(enable: true, $"127.0.0.1:{_proxyPort}");
+
                 _isRunning = true;
                 _logger?.Invoke($"HttpsProxyFilteringEngine active on port {_proxyPort}. System proxy configured.");
             }
@@ -106,6 +126,7 @@ namespace AppBlocker.Core.Enforcement
             try
             {
                 _proxyServer.DisableAllSystemProxies();
+                ConfigureWindowsProxy(enable: false);
                 _proxyServer.Stop();
                 _isRunning = false;
                 _logger?.Invoke("HttpsProxyFilteringEngine stopped and system proxy settings cleanly restored.");
@@ -114,6 +135,81 @@ namespace AppBlocker.Core.Enforcement
             {
                 _logger?.Invoke($"Error stopping proxy: {ex.Message}");
             }
+        }
+
+        [DllImport("wininet.dll", SetLastError = true)]
+        private static extern bool InternetSetOption(IntPtr hInternet, int dwOption, IntPtr lpBuffer, int dwBufferLength);
+
+        private const int INTERNET_OPTION_SETTINGS_CHANGED = 39;
+        private const int INTERNET_OPTION_REFRESH = 37;
+
+        public static void NotifyWinINet()
+        {
+            try
+            {
+                InternetSetOption(IntPtr.Zero, INTERNET_OPTION_SETTINGS_CHANGED, IntPtr.Zero, 0);
+                InternetSetOption(IntPtr.Zero, INTERNET_OPTION_REFRESH, IntPtr.Zero, 0);
+            }
+            catch { }
+        }
+
+        public static void ConfigureWindowsProxy(bool enable, string proxyServer = "127.0.0.1:18888")
+        {
+            try
+            {
+                using var hkcu = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Internet Settings", writable: true);
+                if (hkcu != null)
+                {
+                    hkcu.SetValue("ProxyEnable", enable ? 1 : 0, RegistryValueKind.DWord);
+                    if (enable)
+                    {
+                        hkcu.SetValue("ProxyServer", proxyServer, RegistryValueKind.String);
+                    }
+                }
+            }
+            catch { }
+
+            try
+            {
+                using var hklm = Registry.LocalMachine.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Internet Settings", writable: true);
+                if (hklm != null)
+                {
+                    hklm.SetValue("ProxyEnable", enable ? 1 : 0, RegistryValueKind.DWord);
+                    if (enable)
+                    {
+                        hklm.SetValue("ProxyServer", proxyServer, RegistryValueKind.String);
+                    }
+                }
+            }
+            catch { }
+
+            try
+            {
+                using var users = Registry.Users;
+                foreach (var subKeyName in users.GetSubKeyNames())
+                {
+                    if (subKeyName.StartsWith("S-1-5-21-", StringComparison.OrdinalIgnoreCase) &&
+                        !subKeyName.EndsWith("_Classes", StringComparison.OrdinalIgnoreCase))
+                    {
+                        try
+                        {
+                            using var userKey = users.OpenSubKey($@"{subKeyName}\Software\Microsoft\Windows\CurrentVersion\Internet Settings", writable: true);
+                            if (userKey != null)
+                            {
+                                userKey.SetValue("ProxyEnable", enable ? 1 : 0, RegistryValueKind.DWord);
+                                if (enable)
+                                {
+                                    userKey.SetValue("ProxyServer", proxyServer, RegistryValueKind.String);
+                                }
+                            }
+                        }
+                        catch { }
+                    }
+                }
+            }
+            catch { }
+
+            NotifyWinINet();
         }
 
         private async Task OnBeforeRequestAsync(object sender, SessionEventArgs e)
