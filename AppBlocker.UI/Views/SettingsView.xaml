@@ -1,0 +1,227 @@
+<UserControl x:Class="AppBlocker.UI.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="850" d:DesignWidth="900">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24">
+            <!-- Header -->
+            <StackPanel Margin="0,0,0,20">
+                <TextBlock Text="Settings &amp; Tamper Defense" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
+                <TextBlock Text="Manage background service daemon, anti-tamper policies, and Master PIN credentials." FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
+            </StackPanel>
+
+            <!-- Status Banner -->
+            <Border CornerRadius="8" Padding="14,10" Margin="0,0,0,20"
+                    Visibility="{Binding GeneralStatusMessage, Converter={StaticResource StringNotEmptyToVisConverter}}"
+                    Background="#1E3326">
+                <TextBlock Text="{Binding GeneralStatusMessage}" Foreground="{StaticResource SuccessBrush}" FontSize="13" />
+            </Border>
+
+            <!-- Background Daemon Status Card -->
+            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="Background Worker Service Daemon" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,12" />
+
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel>
+                            <TextBlock Text="{Binding ServiceStatusText}" FontSize="13" Foreground="{StaticResource TextPrimaryBrush}" FontWeight="SemiBold" />
+                            <TextBlock Text="Runs as LocalSystem with automatic Watchdog recovery on crash" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
+                        </StackPanel>
+
+                        <!-- Connection Badge -->
+                        <Border Grid.Column="1" CornerRadius="12" Padding="12,6">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="#1A2D24" />
+                                    <Setter Property="BorderBrush" Value="{StaticResource SuccessBrush}" />
+                                    <Setter Property="BorderThickness" Value="1" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsServiceConnected}" Value="False">
+                                            <Setter Property="Background" Value="#3B1D25" />
+                                            <Setter Property="BorderBrush" Value="{StaticResource DangerBrush}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock FontSize="12" FontWeight="SemiBold">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="CONNECTED" />
+                                        <Setter Property="Foreground" Value="{StaticResource SuccessBrush}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsServiceConnected}" Value="False">
+                                                <Setter Property="Text" Value="OFFLINE" />
+                                                <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Border>
+                    </Grid>
+
+                    <!-- Pause / Resume Controls -->
+                    <TextBlock Text="Global Blocking Controls" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,8" />
+                    <WrapPanel Margin="0,0,0,8">
+                        <Button Content="⏸️ Pause 15m" Command="{Binding PauseBlockingCommand}" CommandParameter="15" Style="{StaticResource ModernSecondaryButton}" Margin="0,0,10,8" />
+                        <Button Content="⏸️ Pause 30m" Command="{Binding PauseBlockingCommand}" CommandParameter="30" Style="{StaticResource ModernSecondaryButton}" Margin="0,0,10,8" />
+                        <Button Content="⏸️ Pause 1h" Command="{Binding PauseBlockingCommand}" CommandParameter="60" Style="{StaticResource ModernSecondaryButton}" Margin="0,0,10,8" />
+                        <Button Content="⏸️ Pause Indefinitely" Command="{Binding PauseBlockingCommand}" CommandParameter="0" Style="{StaticResource ModernSecondaryButton}" Margin="0,0,10,8" />
+                        <Button Content="▶️ Resume Blocking" Command="{Binding ResumeBlockingCommand}" Style="{StaticResource ModernPrimaryButton}" Margin="0,0,0,8" />
+                    </WrapPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Anti-Tamper & Task Manager Lockdown Card -->
+            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="Windows Task Manager Lockdown" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                        <TextBlock Text="Restricts Task Manager (DisableTaskMgr = 1 in Policies\System) to prevent process tampering." FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" TextWrapping="Wrap" />
+                        <TextBlock Text="Automatically restored when the dashboard is unlocked by Master PIN or when blocking is paused." FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0" />
+                    </StackPanel>
+
+                    <Button Grid.Column="1"
+                            Command="{Binding ToggleTaskManagerCommand}"
+                            VerticalAlignment="Center"
+                            Height="38" Padding="14,8">
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource ModernSecondaryButton}">
+                                <Setter Property="Content" Value="🛡️ TaskMgr Enabled" />
+                                <Setter Property="Foreground" Value="{StaticResource SuccessBrush}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsTaskManagerDisabled}" Value="True">
+                                        <Setter Property="Content" Value="🔒 TaskMgr Locked" />
+                                        <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Network Tools Card -->
+            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="Network DNS Resolver Cache" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                        <TextBlock Text="Instantly flush local DNS cache via DnsFlushResolverCache / ipconfig to enforce web filtering." FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
+                    </StackPanel>
+
+                    <Button Grid.Column="1"
+                            Content="⚡ Flush DNS Cache"
+                            Command="{Binding FlushDnsCommand}"
+                            Style="{StaticResource ModernSecondaryButton}"
+                            VerticalAlignment="Center"
+                            Height="38" />
+                </Grid>
+            </Border>
+
+            <!-- Master PIN Management Card -->
+            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,20">
+                <StackPanel>
+                    <TextBlock Text="Master PIN Management" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,12" />
+
+                    <!-- Status Notification -->
+                    <Border CornerRadius="6" Padding="10,8" Margin="0,0,0,12"
+                            Visibility="{Binding PinStatusMessage, Converter={StaticResource StringNotEmptyToVisConverter}}">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Background" Value="#1E3326" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsPinSuccess}" Value="False">
+                                        <Setter Property="Background" Value="#3B1D25" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding PinStatusMessage}" FontSize="12">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{StaticResource SuccessBrush}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsPinSuccess}" Value="False">
+                                            <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Border>
+
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,12">
+                            <TextBlock Text="Current PIN" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                            <TextBox Text="{Binding CurrentPinInput, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,12,12">
+                            <TextBlock Text="New PIN" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                            <TextBox Text="{Binding NewPinInput, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,12,12">
+                            <TextBlock Text="Confirm New PIN" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                            <TextBox Text="{Binding ConfirmPinInput, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="0" Grid.Column="3" VerticalAlignment="Bottom" Margin="0,0,0,12">
+                            <Button Content="Update PIN" Command="{Binding ChangePinCommand}" Style="{StaticResource ModernPrimaryButton}" Height="38" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Lock Dashboard Action -->
+            <Border Style="{StaticResource ModernCard}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel>
+                        <TextBlock Text="Lock Session" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                        <TextBlock Text="Return to the authentication gate to prevent unauthorized configuration changes." FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
+                    </StackPanel>
+
+                    <Button Grid.Column="1"
+                            Content="🔒 Lock Dashboard"
+                            Command="{Binding LockDashboardCommand}"
+                            Style="{StaticResource ModernSecondaryButton}"
+                            Height="38" />
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

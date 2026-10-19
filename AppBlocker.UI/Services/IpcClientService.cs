@@ -1,0 +1,109 @@
+using System;
+using System.Threading.Tasks;
+using AppBlocker.Core.IPC;
+
+namespace AppBlocker.UI.Services
+{
+    public class IpcClientService
+    {
+        private readonly NamedPipeIpcClient _client;
+
+        public IpcClientService()
+        {
+            _client = new NamedPipeIpcClient();
+        }
+
+        public async Task<bool> IsServiceAvailableAsync()
+        {
+            return await _client.IsServiceRunningAsync(timeoutMs: 1500);
+        }
+
+        public async Task<ServiceStatusDto?> GetStatusAsync()
+        {
+            return await _client.GetStatusAsync();
+        }
+
+        public async Task<IpcResponse> ReloadRulesAsync()
+        {
+            return await _client.SendCommandAsync(IpcConstants.Commands.ReloadRules);
+        }
+
+        public async Task<IpcResponse> PauseBlockingAsync(int minutes = 0)
+        {
+            return await _client.SendCommandAsync(IpcConstants.Commands.PauseBlocking, new PauseBlockingDto { DurationMinutes = minutes });
+        }
+
+        public async Task<IpcResponse> ResumeBlockingAsync()
+        {
+            return await _client.SendCommandAsync(IpcConstants.Commands.ResumeBlocking);
+        }
+
+        public async Task<IpcResponse> TemporaryUnlockAppAsync(string processName, int minutes = 15)
+        {
+            var dto = new TemporaryUnlockDto
+            {
+                ProcessName = processName,
+                DurationMinutes = minutes
+            };
+            return await _client.SendCommandAsync(IpcConstants.Commands.TemporaryUnlockApp, dto);
+        }
+
+        public async Task<IpcResponse> AddAppRuleAsync(string targetExeOrName, string scheduleType = "Always")
+        {
+            var dto = new RuleUpdateDto
+            {
+                RuleType = "App",
+                Target = targetExeOrName,
+                IsActive = true,
+                ScheduleType = scheduleType
+            };
+            return await _client.SendCommandAsync(IpcConstants.Commands.AddAppRule, dto);
+        }
+
+        public async Task<IpcResponse> RemoveAppRuleAsync(int ruleId)
+        {
+            var dto = new RuleUpdateDto { RuleType = "App", RuleId = ruleId };
+            return await _client.SendCommandAsync(IpcConstants.Commands.RemoveAppRule, dto);
+        }
+
+        public async Task<IpcResponse> AddWebRuleAsync(string urlOrDomain, string scheduleType = "Always")
+        {
+            var dto = new RuleUpdateDto
+            {
+                RuleType = "Web",
+                Target = urlOrDomain,
+                IsActive = true,
+                ScheduleType = scheduleType
+            };
+            return await _client.SendCommandAsync(IpcConstants.Commands.AddWebRule, dto);
+        }
+
+        public async Task<IpcResponse> RemoveWebRuleAsync(int ruleId)
+        {
+            var dto = new RuleUpdateDto { RuleType = "Web", RuleId = ruleId };
+            return await _client.SendCommandAsync(IpcConstants.Commands.RemoveWebRule, dto);
+        }
+
+        public async Task<IpcResponse> FlushDnsAsync()
+        {
+            return await _client.SendCommandAsync(IpcConstants.Commands.FlushDns);
+        }
+
+        public async Task<IpcResponse> SetTaskManagerStateAsync(bool disable)
+        {
+            var dto = new TaskManagerStateDto { IsDisabled = disable };
+            return await _client.SendCommandAsync(IpcConstants.Commands.SetTaskManagerState, dto);
+        }
+
+        public async Task<bool> IsTaskManagerDisabledAsync()
+        {
+            var response = await _client.SendCommandAsync(IpcConstants.Commands.GetTaskManagerState);
+            if (response.Success && !string.IsNullOrEmpty(response.Payload))
+            {
+                var dto = response.GetPayload<TaskManagerStateDto>();
+                return dto?.IsDisabled ?? false;
+            }
+            return false;
+        }
+    }
+}

@@ -1,0 +1,33 @@
+## Visual Studio & .NET Core
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+## SQLite temporary and database files
+*.db
+*.db-wal
+*.db-shm
+*.appblocker.bak
+
+## OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
