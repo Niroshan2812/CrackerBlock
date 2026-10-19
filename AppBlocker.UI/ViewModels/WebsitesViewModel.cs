@@ -23,6 +23,9 @@ namespace AppBlocker.UI.ViewModels
         private string _newUrlOrDomain = string.Empty;
 
         [ObservableProperty]
+        private string _newRedirectUrl = string.Empty;
+
+        [ObservableProperty]
         private string _selectedSchedule = ScheduleTypes.Always;
 
         [ObservableProperty]
@@ -77,6 +80,16 @@ namespace AppBlocker.UI.ViewModels
                 return;
             }
 
+            var redirect = string.IsNullOrWhiteSpace(NewRedirectUrl) ? null : NewRedirectUrl.Trim();
+            if (!string.IsNullOrWhiteSpace(redirect))
+            {
+                if (!redirect.StartsWith("http://", StringComparison.OrdinalIgnoreCase) &&
+                    !redirect.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                {
+                    redirect = "https://" + redirect;
+                }
+            }
+
             IsBusy = true;
             try
             {
@@ -87,12 +100,14 @@ namespace AppBlocker.UI.ViewModels
                 {
                     existing.IsActive = true;
                     existing.ScheduleType = SelectedSchedule;
+                    existing.RedirectUrl = redirect;
                 }
                 else
                 {
                     db.WebRules.Add(new WebRule
                     {
                         UrlOrKeyword = cleanDomain,
+                        RedirectUrl = redirect,
                         IsActive = true,
                         ScheduleType = SelectedSchedule,
                         CreatedAt = DateTime.UtcNow
@@ -103,17 +118,20 @@ namespace AppBlocker.UI.ViewModels
                 {
                     Timestamp = DateTime.UtcNow,
                     EventType = "Rule Created",
-                    Description = $"Web Rule added: {cleanDomain} (Schedule: {SelectedSchedule})"
+                    Description = $"Web Rule added: {cleanDomain} (Schedule: {SelectedSchedule}, Redirect: {redirect ?? "None"})"
                 });
 
                 await db.SaveChangesAsync();
 
-                // Send IPC message to Worker Service to update hosts file and flush DNS cache immediately
-                var ipcResp = await _ipcClient.AddWebRuleAsync(cleanDomain, SelectedSchedule);
+                // Send IPC message to Worker Service to update proxy filtering engine immediately
+                var ipcResp = await _ipcClient.AddWebRuleAsync(cleanDomain, SelectedSchedule, redirect);
 
-                SetStatus($"Domain '{cleanDomain}' blocked! Service: {ipcResp.Message}", true);
+                SetStatus(string.IsNullOrWhiteSpace(redirect)
+                    ? $"Domain '{cleanDomain}' blocked! Service: {ipcResp.Message}"
+                    : $"Domain '{cleanDomain}' redirected to '{redirect}'! Service: {ipcResp.Message}", true);
 
                 NewUrlOrDomain = string.Empty;
+                NewRedirectUrl = string.Empty;
                 await LoadRulesAsync();
             }
             catch (Exception ex)

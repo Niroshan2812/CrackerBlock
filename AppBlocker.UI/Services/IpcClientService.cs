@@ -66,12 +66,13 @@ namespace AppBlocker.UI.Services
             return await _client.SendCommandAsync(IpcConstants.Commands.RemoveAppRule, dto);
         }
 
-        public async Task<IpcResponse> AddWebRuleAsync(string urlOrDomain, string scheduleType = "Always")
+        public async Task<IpcResponse> AddWebRuleAsync(string urlOrDomain, string scheduleType = "Always", string? redirectUrl = null)
         {
             var dto = new RuleUpdateDto
             {
                 RuleType = "Web",
                 Target = urlOrDomain,
+                RedirectUrl = redirectUrl,
                 IsActive = true,
                 ScheduleType = scheduleType
             };

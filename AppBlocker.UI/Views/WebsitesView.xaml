@@ -43,33 +43,49 @@
             <!-- Add Website Card -->
             <Border Style="{StaticResource ModernCard}" Margin="0,0,0,24">
                 <StackPanel>
-                    <TextBlock Text="Add New Website Filter Rule" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,16" />
+                    <TextBlock Text="Add New Website Filter &amp; Redirect Rule" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,16" />
 
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
+                    <!-- Two-column input for Domain and Redirect URL -->
+                    <Grid Margin="0,0,0,14">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2.5*" />
-                            <ColumnDefinition Width="1.5*" />
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
                         <!-- URL or Domain input -->
-                        <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                            <TextBlock Text="Domain / URL (e.g. youtube.com, reddit.com, tiktok.com)" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="Target Domain / URL to Intercept (e.g. youtube.com, tiktok.com)" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
                             <TextBox Text="{Binding NewUrlOrDomain, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38" />
                         </StackPanel>
 
+                        <!-- Redirect URL input (Optional) -->
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Redirect To URL (Optional, e.g. https://en.wikipedia.org)" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                            <TextBox Text="{Binding NewRedirectUrl, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38" />
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Bottom row: Schedule and Action button -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="280" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
                         <!-- Schedule Selector -->
-                        <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                        <StackPanel Grid.Column="0">
                             <TextBlock Text="Enforcement Schedule" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
                             <ComboBox ItemsSource="{Binding ScheduleOptions}" SelectedItem="{Binding SelectedSchedule}" Style="{StaticResource ModernComboBox}" Height="38" />
                         </StackPanel>
 
+                        <!-- Helper hint -->
+                        <TextBlock Grid.Column="1" Text="💡 If Redirect is left blank, visitors will see a secure dark-mode block page." FontSize="12" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Bottom" Margin="16,0,16,10" />
+
                         <!-- Add Rule Button -->
                         <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
-                            <Button Content="➕ Block Website" Command="{Binding AddRuleCommand}" Style="{StaticResource ModernPrimaryButton}" Height="38" />
+                            <Button Content="➕ Add Website Rule" Command="{Binding AddRuleCommand}" Style="{StaticResource ModernPrimaryButton}" Height="38" />
                         </StackPanel>
                     </Grid>
                 </StackPanel>
@@ -90,26 +106,35 @@
                                 <Border Background="{StaticResource BgSidebarBrush}" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,10">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="Auto" />
+                                             <ColumnDefinition Width="Auto" />
+                                             <ColumnDefinition Width="*" />
+                                             <ColumnDefinition Width="Auto" />
+                                             <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
 
                                         <!-- Globe Icon -->
-                                        <Border Grid.Column="0" Width="36" Height="36" CornerRadius="6" Background="#162A38" BorderBrush="{StaticResource AccentCyanBrush}" BorderThickness="1" Margin="0,0,12,0">
-                                            <TextBlock Text="🌐" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <Border Grid.Column="0" Width="38" Height="38" CornerRadius="8" Background="#162A38" BorderBrush="{StaticResource AccentCyanBrush}" BorderThickness="1" Margin="0,0,14,0">
+                                            <TextBlock Text="🌐" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
 
                                         <!-- Domain Details -->
                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                            <StackPanel Orientation="Horizontal">
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                                                 <TextBlock Text="{Binding UrlOrKeyword}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,8,0" />
                                                 <Border CornerRadius="4" Padding="6,2" Background="#162A38">
                                                     <TextBlock Text="{Binding ScheduleType}" FontSize="11" Foreground="{StaticResource AccentCyanBrush}" FontWeight="SemiBold" />
                                                 </Border>
                                             </StackPanel>
-                                            <TextBlock Text="Redirected to 127.0.0.1 and ::1 via Windows hosts" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
+
+                                            <!-- When Redirect is set -->
+                                            <StackPanel Orientation="Horizontal" Visibility="{Binding RedirectUrl, Converter={StaticResource StringNotEmptyToVisConverter}}">
+                                                <TextBlock Text="↪ Redirects to: " FontSize="11" Foreground="{StaticResource AccentPurpleBrush}" FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding RedirectUrl}" FontSize="11" Foreground="{StaticResource AccentCyanBrush}" TextTrimming="CharacterEllipsis" MaxWidth="450" />
+                                            </StackPanel>
+
+                                            <!-- When Direct Block (no redirect) -->
+                                            <TextBlock Text="🚫 Direct Block (Enforced by Local HTTPS Engine)" FontSize="11" Foreground="{StaticResource TextMutedBrush}"
+                                                       Visibility="{Binding RedirectUrl, Converter={StaticResource StringEmptyToVisConverter}}" />
                                         </StackPanel>
 
                                         <!-- Status Toggle -->

@@ -15,6 +15,7 @@
     </PackageReference>
     <PackageReference Include="System.IO.Pipes.AccessControl" Version="5.0.0" />
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
+    <PackageReference Include="Titanium.Web.Proxy" Version="3.1.1450" />
   </ItemGroup>
 
 </Project>

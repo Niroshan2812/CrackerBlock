@@ -111,6 +111,7 @@ namespace AppBlocker.Core.Data
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.UrlOrKeyword).IsRequired().HasMaxLength(512);
+                entity.Property(e => e.RedirectUrl).HasMaxLength(1024);
                 entity.HasIndex(e => e.UrlOrKeyword);
                 entity.HasIndex(e => e.IsActive);
             });
@@ -143,6 +144,13 @@ namespace AppBlocker.Core.Data
                 // Enable Write-Ahead Logging & busy timeout for cross-process concurrency
                 context.Database.ExecuteSqlRaw("PRAGMA journal_mode = WAL;");
                 context.Database.ExecuteSqlRaw("PRAGMA busy_timeout = 5000;");
+
+                // Auto-migrate RedirectUrl column if existing database was created without it
+                try
+                {
+                    context.Database.ExecuteSqlRaw("ALTER TABLE WebRulesTable ADD COLUMN RedirectUrl TEXT;");
+                }
+                catch { }
             }
             catch
             {

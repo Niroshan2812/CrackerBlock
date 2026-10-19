@@ -19,6 +19,7 @@ namespace AppBlocker.Service
         private readonly ILogger<Worker> _logger;
         private readonly AppLockingEngine _appLockingEngine;
         private readonly WebFilteringEngine _webFilteringEngine;
+        private readonly HttpsProxyFilteringEngine _httpsProxyEngine;
         private readonly TaskManagerLockdownService _taskManagerLockdownService;
         private NamedPipeIpcServer? _ipcServer;
         private readonly DateTime _serviceStartTime = DateTime.UtcNow;
@@ -31,6 +32,11 @@ namespace AppBlocker.Service
             _logger = logger;
             _appLockingEngine = new AppLockingEngine(msg => _logger.LogInformation("{Message}", msg));
             _webFilteringEngine = new WebFilteringEngine(null, msg => _logger.LogInformation("{Message}", msg));
+            _httpsProxyEngine = new HttpsProxyFilteringEngine(18888, msg => _logger.LogInformation("{Message}", msg));
+            _httpsProxyEngine.WebAccessIntercepted += (host, redirect) =>
+            {
+                _logger.LogInformation("Web filter intercepted: {Host} -> {Redirect}", host, redirect ?? "BLOCKED");
+            };
             _taskManagerLockdownService = new TaskManagerLockdownService(TaskManagerLockdownService.DefaultPolicySubKey, msg => _logger.LogInformation("{Message}", msg));
         }
 
@@ -41,14 +47,25 @@ namespace AppBlocker.Service
             // Load initial app blocking rules
             await _appLockingEngine.LoadRulesAsync();
 
-            // Apply initial web filtering rules to hosts file
+            // Clear legacy hosts entries
             try
             {
-                await _webFilteringEngine.ApplyRulesFromDatabaseAsync();
+                await _webFilteringEngine.ClearManagedEntriesAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Failed to apply initial web filtering rules.");
+                _logger.LogWarning(ex, "Failed to clear legacy web filtering rules.");
+            }
+
+            // Start OS-level HTTPS proxy filtering engine
+            try
+            {
+                await _httpsProxyEngine.LoadRulesFromDatabaseAsync();
+                _httpsProxyEngine.Start();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to start HTTPS proxy filtering engine.");
             }
 
             // Initialize IPC Server
@@ -93,9 +110,10 @@ namespace AppBlocker.Service
                     _pauseUntil = null;
                     _appLockingEngine.IsPaused = false;
                     _webFilteringEngine.IsPaused = false;
+                    _httpsProxyEngine.IsPaused = false;
                     _logger.LogInformation("Blocking pause expired. Resumed enforcement.");
 
-                    await _webFilteringEngine.ApplyRulesFromDatabaseAsync();
+                    await _httpsProxyEngine.LoadRulesFromDatabaseAsync();
 
                     try
                     {
@@ -113,6 +131,7 @@ namespace AppBlocker.Service
 
                 _appLockingEngine.IsPaused = _isBlockingPaused;
                 _webFilteringEngine.IsPaused = _isBlockingPaused;
+                _httpsProxyEngine.IsPaused = _isBlockingPaused;
 
                 // Milestone 2 Enforcement: Process polling every 1.5 seconds
                 if (!_isBlockingPaused)
@@ -132,7 +151,7 @@ namespace AppBlocker.Service
                         _lastWebScheduleCheck = DateTime.UtcNow;
                         try
                         {
-                            await _webFilteringEngine.ApplyRulesFromDatabaseAsync();
+                            await _httpsProxyEngine.LoadRulesFromDatabaseAsync();
                         }
                         catch { }
                     }
@@ -149,6 +168,17 @@ namespace AppBlocker.Service
             if (_ipcServer != null)
             {
                 await _ipcServer.StopAsync();
+            }
+
+            // Stop HTTPS proxy engine and restore system proxy settings cleanly
+            try
+            {
+                _httpsProxyEngine.Stop();
+                _httpsProxyEngine.Dispose();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to stop HTTPS proxy engine during shutdown.");
             }
 
             // Restore hosts file cleanly when service stops
@@ -226,7 +256,7 @@ namespace AppBlocker.Service
                 case IpcConstants.Commands.ReloadRules:
                 {
                     await _appLockingEngine.LoadRulesAsync();
-                    await _webFilteringEngine.ApplyRulesFromDatabaseAsync();
+                    await _httpsProxyEngine.LoadRulesFromDatabaseAsync();
 
                     await using var db = AppBlockerDbContext.CreateContext();
                     var activeApps = await db.AppRules.Where(r => r.IsActive).ToListAsync();
@@ -255,6 +285,7 @@ namespace AppBlocker.Service
                     _isBlockingPaused = true;
                     _appLockingEngine.IsPaused = true;
                     _webFilteringEngine.IsPaused = true;
+                    _httpsProxyEngine.IsPaused = true;
 
                     // Cleanly remove blocked domains while paused
                     await _webFilteringEngine.ClearManagedEntriesAsync();
@@ -286,9 +317,10 @@ namespace AppBlocker.Service
                     _pauseUntil = null;
                     _appLockingEngine.IsPaused = false;
                     _webFilteringEngine.IsPaused = false;
+                    _httpsProxyEngine.IsPaused = false;
 
                     // Re-apply web filtering rules immediately
-                    await _webFilteringEngine.ApplyRulesFromDatabaseAsync();
+                    await _httpsProxyEngine.LoadRulesFromDatabaseAsync();
 
                     await using var db = AppBlockerDbContext.CreateContext();
                     db.Logs.Add(new SystemLog
@@ -422,18 +454,22 @@ namespace AppBlocker.Service
                         return IpcResponse.Error(request.Id, "Invalid domain name.");
                     }
 
+                    var redirect = string.IsNullOrWhiteSpace(ruleDto.RedirectUrl) ? null : ruleDto.RedirectUrl.Trim();
+
                     await using var db = AppBlockerDbContext.CreateContext();
                     var existing = await db.WebRules.FirstOrDefaultAsync(r => r.UrlOrKeyword.ToLower() == domainClean);
                     if (existing != null)
                     {
                         existing.IsActive = true;
                         existing.ScheduleType = ruleDto.ScheduleType ?? ScheduleTypes.Always;
+                        existing.RedirectUrl = redirect;
                     }
                     else
                     {
                         db.WebRules.Add(new WebRule
                         {
                             UrlOrKeyword = domainClean,
+                            RedirectUrl = redirect,
                             IsActive = true,
                             ScheduleType = ruleDto.ScheduleType ?? ScheduleTypes.Always,
                             CreatedAt = DateTime.UtcNow
@@ -444,12 +480,12 @@ namespace AppBlocker.Service
                     {
                         Timestamp = DateTime.UtcNow,
                         EventType = "Rule Created",
-                        Description = $"Web Rule added: {domainClean} (Schedule: {ruleDto.ScheduleType ?? ScheduleTypes.Always})"
+                        Description = $"Web Rule added: {domainClean} (Schedule: {ruleDto.ScheduleType ?? ScheduleTypes.Always}, Redirect: {redirect ?? "None"})"
                     });
                     await db.SaveChangesAsync();
 
-                    // Apply updated rules to hosts file immediately
-                    await _webFilteringEngine.ApplyRulesFromDatabaseAsync();
+                    // Apply updated rules to proxy engine immediately
+                    await _httpsProxyEngine.LoadRulesFromDatabaseAsync();
 
                     return IpcResponse.Ok(request.Id, $"Web rule '{domainClean}' saved and active.");
                 }
@@ -475,8 +511,8 @@ namespace AppBlocker.Service
                         });
                         await db.SaveChangesAsync();
 
-                        // Apply updated rules to hosts file immediately
-                        await _webFilteringEngine.ApplyRulesFromDatabaseAsync();
+                        // Apply updated rules to proxy engine immediately
+                        await _httpsProxyEngine.LoadRulesFromDatabaseAsync();
 
                         return IpcResponse.Ok(request.Id, $"Web rule '{rule.UrlOrKeyword}' removed.");
                     }

@@ -81,6 +81,7 @@ namespace AppBlocker.Core.IPC
         public int RuleId { get; set; }
         public string RuleType { get; set; } = "App"; // "App" or "Web"
         public string Target { get; set; } = string.Empty;
+        public string? RedirectUrl { get; set; }
         public bool IsActive { get; set; } = true;
         public string ScheduleType { get; set; } = "Always";
     }

@@ -42,9 +42,13 @@ namespace AppBlocker.UI.Converters
 
     public class StringNotNullOrEmptyToVisibilityConverter : IValueConverter
     {
+        public bool Invert { get; set; } = false;
+
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            return string.IsNullOrEmpty(value as string) ? Visibility.Collapsed : Visibility.Visible;
+            bool hasValue = !string.IsNullOrWhiteSpace(value as string);
+            if (Invert) hasValue = !hasValue;
+            return hasValue ? Visibility.Visible : Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

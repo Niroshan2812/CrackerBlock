@@ -21,7 +21,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AppBlocker.Core\AppBlocker.Core.csproj" />
-    <ProjectReference Include="..\AppBlocker.Service\AppBlocker.Service.csproj" />
     <ProjectReference Include="..\AppBlocker.UI\AppBlocker.UI.csproj" />
   </ItemGroup>
 

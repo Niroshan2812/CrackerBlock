@@ -15,6 +15,9 @@ namespace AppBlocker.Core.Models
         [MaxLength(512)]
         public string UrlOrKeyword { get; set; } = string.Empty;
 
+        [MaxLength(1024)]
+        public string? RedirectUrl { get; set; }
+
         public bool IsActive { get; set; } = true;
 
         [Required]
