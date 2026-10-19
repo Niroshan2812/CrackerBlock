@@ -54,7 +54,8 @@
                     <!-- Tab Navigation Buttons -->
                     <StackPanel Grid.Row="1" Margin="14,18,14,0">
                         <!-- Apps Tab -->
-                        <RadioButton GroupName="NavTabs" IsChecked="{Binding SelectedTabIndex, Converter={x:Null}, Mode=OneWay}"
+                        <RadioButton GroupName="NavTabs"
+                                     IsChecked="{Binding SelectedTabIndex, Converter={StaticResource EqualityToBoolConverter}, ConverterParameter=0, Mode=TwoWay}"
                                      Click="NavButton_Click" Tag="0" Margin="0,0,0,6">
                             <RadioButton.Style>
                                 <Style TargetType="RadioButton">
@@ -84,7 +85,9 @@
                         </RadioButton>
 
                         <!-- Websites Tab -->
-                        <RadioButton GroupName="NavTabs" Click="NavButton_Click" Tag="1" Margin="0,0,0,6">
+                        <RadioButton GroupName="NavTabs"
+                                     IsChecked="{Binding SelectedTabIndex, Converter={StaticResource EqualityToBoolConverter}, ConverterParameter=1, Mode=TwoWay}"
+                                     Click="NavButton_Click" Tag="1" Margin="0,0,0,6">
                             <RadioButton.Style>
                                 <Style TargetType="RadioButton">
                                     <Setter Property="Template">
@@ -113,7 +116,9 @@
                         </RadioButton>
 
                         <!-- Schedules Tab -->
-                        <RadioButton GroupName="NavTabs" Click="NavButton_Click" Tag="2" Margin="0,0,0,6">
+                        <RadioButton GroupName="NavTabs"
+                                     IsChecked="{Binding SelectedTabIndex, Converter={StaticResource EqualityToBoolConverter}, ConverterParameter=2, Mode=TwoWay}"
+                                     Click="NavButton_Click" Tag="2" Margin="0,0,0,6">
                             <RadioButton.Style>
                                 <Style TargetType="RadioButton">
                                     <Setter Property="Template">
@@ -142,7 +147,9 @@
                         </RadioButton>
 
                         <!-- Logs Tab -->
-                        <RadioButton GroupName="NavTabs" Click="NavButton_Click" Tag="3" Margin="0,0,0,6">
+                        <RadioButton GroupName="NavTabs"
+                                     IsChecked="{Binding SelectedTabIndex, Converter={StaticResource EqualityToBoolConverter}, ConverterParameter=3, Mode=TwoWay}"
+                                     Click="NavButton_Click" Tag="3" Margin="0,0,0,6">
                             <RadioButton.Style>
                                 <Style TargetType="RadioButton">
                                     <Setter Property="Template">
@@ -171,7 +178,9 @@
                         </RadioButton>
 
                         <!-- Settings Tab -->
-                        <RadioButton GroupName="NavTabs" Click="NavButton_Click" Tag="4" Margin="0,0,0,6">
+                        <RadioButton GroupName="NavTabs"
+                                     IsChecked="{Binding SelectedTabIndex, Converter={StaticResource EqualityToBoolConverter}, ConverterParameter=4, Mode=TwoWay}"
+                                     Click="NavButton_Click" Tag="4" Margin="0,0,0,6">
                             <RadioButton.Style>
                                 <Style TargetType="RadioButton">
                                     <Setter Property="Template">
@@ -252,71 +261,30 @@
 
             <!-- Main Content Area with Tab Switching -->
             <Grid Grid.Column="1" Background="{StaticResource BgMainBrush}">
-                <views:AppsView DataContext="{Binding AppsVM}"
-                                Visibility="{Binding SelectedTabIndex, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource BoolToVisConverter}}">
-                    <views:AppsView.Style>
-                        <Style TargetType="views:AppsView">
-                            <Setter Property="Visibility" Value="Collapsed" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding SelectedTabIndex}" Value="0">
-                                    <Setter Property="Visibility" Value="Visible" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </views:AppsView.Style>
-                </views:AppsView>
+                <!-- Apps Tab (Index 0) -->
+                <Grid Visibility="{Binding SelectedTabIndex, Converter={StaticResource EqualityToVisConverter}, ConverterParameter=0}">
+                    <views:AppsView DataContext="{Binding AppsVM}" />
+                </Grid>
 
-                <views:WebsitesView DataContext="{Binding WebsitesVM}">
-                    <views:WebsitesView.Style>
-                        <Style TargetType="views:WebsitesView">
-                            <Setter Property="Visibility" Value="Collapsed" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding SelectedTabIndex}" Value="1">
-                                    <Setter Property="Visibility" Value="Visible" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </views:WebsitesView.Style>
-                </views:WebsitesView>
+                <!-- Websites Tab (Index 1) -->
+                <Grid Visibility="{Binding SelectedTabIndex, Converter={StaticResource EqualityToVisConverter}, ConverterParameter=1}">
+                    <views:WebsitesView DataContext="{Binding WebsitesVM}" />
+                </Grid>
 
-                <views:SchedulesView DataContext="{Binding SchedulesVM}">
-                    <views:SchedulesView.Style>
-                        <Style TargetType="views:SchedulesView">
-                            <Setter Property="Visibility" Value="Collapsed" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding SelectedTabIndex}" Value="2">
-                                    <Setter Property="Visibility" Value="Visible" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </views:SchedulesView.Style>
-                </views:SchedulesView>
+                <!-- Schedules Tab (Index 2) -->
+                <Grid Visibility="{Binding SelectedTabIndex, Converter={StaticResource EqualityToVisConverter}, ConverterParameter=2}">
+                    <views:SchedulesView DataContext="{Binding SchedulesVM}" />
+                </Grid>
 
-                <views:LogsView DataContext="{Binding LogsVM}">
-                    <views:LogsView.Style>
-                        <Style TargetType="views:LogsView">
-                            <Setter Property="Visibility" Value="Collapsed" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding SelectedTabIndex}" Value="3">
-                                    <Setter Property="Visibility" Value="Visible" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </views:LogsView.Style>
-                </views:LogsView>
+                <!-- Logs Tab (Index 3) -->
+                <Grid Visibility="{Binding SelectedTabIndex, Converter={StaticResource EqualityToVisConverter}, ConverterParameter=3}">
+                    <views:LogsView DataContext="{Binding LogsVM}" />
+                </Grid>
 
-                <views:SettingsView DataContext="{Binding SettingsVM}">
-                    <views:SettingsView.Style>
-                        <Style TargetType="views:SettingsView">
-                            <Setter Property="Visibility" Value="Collapsed" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding SelectedTabIndex}" Value="4">
-                                    <Setter Property="Visibility" Value="Visible" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </views:SettingsView.Style>
-                </views:SettingsView>
+                <!-- Settings Tab (Index 4) -->
+                <Grid Visibility="{Binding SelectedTabIndex, Converter={StaticResource EqualityToVisConverter}, ConverterParameter=4}">
+                    <views:SettingsView DataContext="{Binding SettingsVM}" />
+                </Grid>
             </Grid>
         </Grid>
     </Grid>

@@ -67,9 +67,25 @@ namespace AppBlocker.UI.ViewModels
             await AppsVM.LoadRulesAsync();
         }
 
+        partial void OnSelectedTabIndexChanged(int value)
+        {
+            _ = LoadTabDataAsync(value);
+        }
+
         public async Task OnTabChangedAsync(int newIndex)
         {
-            SelectedTabIndex = newIndex;
+            if (SelectedTabIndex != newIndex)
+            {
+                SelectedTabIndex = newIndex;
+            }
+            else
+            {
+                await LoadTabDataAsync(newIndex);
+            }
+        }
+
+        public async Task LoadTabDataAsync(int newIndex)
+        {
             switch (newIndex)
             {
                 case 0:
