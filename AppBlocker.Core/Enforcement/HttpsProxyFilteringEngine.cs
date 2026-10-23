@@ -21,6 +21,7 @@ namespace AppBlocker.Core.Enforcement
         private readonly ProxyServer _proxyServer;
         private readonly ExplicitProxyEndPoint _explicitEndPoint;
         private readonly List<WebRule> _activeRules = new();
+        private readonly List<CustomSchedule> _customSchedules = new();
         private readonly object _rulesLock = new();
         private readonly Action<string>? _logger;
         private readonly int _proxyPort;
@@ -28,6 +29,7 @@ namespace AppBlocker.Core.Enforcement
         private bool _disposed = false;
 
         private bool _isPaused = false;
+        public bool IsFocusModeActive { get; set; } = false;
         public bool IsPaused
         {
             get => _isPaused;
@@ -76,13 +78,32 @@ namespace AppBlocker.Core.Enforcement
             _logger?.Invoke($"HttpsProxyFilteringEngine updated with {_activeRules.Count} active rule(s).");
         }
 
+        public void UpdateCustomSchedules(IEnumerable<CustomSchedule> schedules)
+        {
+            lock (_rulesLock)
+            {
+                _customSchedules.Clear();
+                _customSchedules.AddRange(schedules);
+            }
+        }
+
         public async Task LoadRulesFromDatabaseAsync()
         {
             try
             {
                 await using var db = AppBlockerDbContext.CreateContext();
                 var rules = await db.WebRules.Where(r => r.IsActive).ToListAsync();
-                LoadRules(rules);
+                var schedules = await db.CustomSchedules.Where(s => s.IsActive).ToListAsync();
+
+                lock (_rulesLock)
+                {
+                    _activeRules.Clear();
+                    _activeRules.AddRange(rules);
+                    _customSchedules.Clear();
+                    _customSchedules.AddRange(schedules);
+                }
+
+                _logger?.Invoke($"HttpsProxyFilteringEngine updated with {rules.Count} active rule(s) and {schedules.Count} custom schedule(s).");
             }
             catch (Exception ex)
             {
@@ -235,7 +256,7 @@ namespace AppBlocker.Core.Enforcement
                 lock (_rulesLock)
                 {
                     matchedRule = _activeRules.FirstOrDefault(r => 
-                        ScheduleTypes.IsRuleCurrentlyActive(r.ScheduleType, now) &&
+                        ScheduleTypes.IsRuleCurrentlyActive(r.ScheduleType, now, _customSchedules, IsFocusModeActive) &&
                         IsHostMatchingRule(host, r.UrlOrKeyword));
                 }
 

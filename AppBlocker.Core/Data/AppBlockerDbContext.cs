@@ -10,6 +10,7 @@ namespace AppBlocker.Core.Data
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<AppRule> AppRules { get; set; } = null!;
         public DbSet<WebRule> WebRules { get; set; } = null!;
+        public DbSet<CustomSchedule> CustomSchedules { get; set; } = null!;
         public DbSet<SystemLog> Logs { get; set; } = null!;
 
         public static string DefaultDbDirectory
@@ -116,6 +117,17 @@ namespace AppBlocker.Core.Data
                 entity.HasIndex(e => e.IsActive);
             });
 
+            // CustomSchedule configuration
+            modelBuilder.Entity<CustomSchedule>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(128);
+                entity.Property(e => e.StartTime).IsRequired().HasMaxLength(10);
+                entity.Property(e => e.EndTime).IsRequired().HasMaxLength(10);
+                entity.Property(e => e.DaysOfWeek).IsRequired().HasMaxLength(64);
+                entity.HasIndex(e => e.IsActive);
+            });
+
             // SystemLog configuration
             modelBuilder.Entity<SystemLog>(entity =>
             {
@@ -149,6 +161,21 @@ namespace AppBlocker.Core.Data
                 try
                 {
                     context.Database.ExecuteSqlRaw("ALTER TABLE WebRulesTable ADD COLUMN RedirectUrl TEXT;");
+                }
+                catch { }
+
+                // Auto-create CustomSchedules table if not exists
+                try
+                {
+                    context.Database.ExecuteSqlRaw(@"
+                        CREATE TABLE IF NOT EXISTS CustomSchedules (
+                            Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            Name TEXT NOT NULL,
+                            StartTime TEXT NOT NULL,
+                            EndTime TEXT NOT NULL,
+                            DaysOfWeek TEXT NOT NULL,
+                            IsActive INTEGER NOT NULL DEFAULT 1
+                        );");
                 }
                 catch { }
             }

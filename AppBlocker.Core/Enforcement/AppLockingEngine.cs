@@ -15,11 +15,13 @@ namespace AppBlocker.Core.Enforcement
     public class AppLockingEngine
     {
         private readonly List<AppRule> _activeRules = new();
+        private readonly List<CustomSchedule> _customSchedules = new();
         private readonly object _rulesLock = new();
         private readonly ConcurrentDictionary<string, DateTime> _temporarilyUnlockedApps = new(StringComparer.OrdinalIgnoreCase);
         private readonly Action<string>? _logger;
 
         public bool IsPaused { get; set; } = false;
+        public bool IsFocusModeActive { get; set; } = false;
         public event Action<string, int, string>? ProcessTerminated;
 
         public AppLockingEngine(Action<string>? logger = null)
@@ -33,14 +35,17 @@ namespace AppBlocker.Core.Enforcement
             {
                 await using var db = AppBlockerDbContext.CreateContext();
                 var rules = await db.AppRules.Where(r => r.IsActive).ToListAsync();
+                var schedules = await db.CustomSchedules.Where(s => s.IsActive).ToListAsync();
 
                 lock (_rulesLock)
                 {
                     _activeRules.Clear();
                     _activeRules.AddRange(rules);
+                    _customSchedules.Clear();
+                    _customSchedules.AddRange(schedules);
                 }
 
-                _logger?.Invoke($"AppLockingEngine loaded {rules.Count} active rule(s).");
+                _logger?.Invoke($"AppLockingEngine loaded {rules.Count} active rule(s) and {schedules.Count} custom schedule(s).");
             }
             catch (Exception ex)
             {
@@ -54,6 +59,15 @@ namespace AppBlocker.Core.Enforcement
             {
                 _activeRules.Clear();
                 _activeRules.AddRange(rules.Where(r => r.IsActive));
+            }
+        }
+
+        public void UpdateCustomSchedules(IEnumerable<CustomSchedule> schedules)
+        {
+            lock (_rulesLock)
+            {
+                _customSchedules.Clear();
+                _customSchedules.AddRange(schedules);
             }
         }
 
@@ -101,6 +115,7 @@ namespace AppBlocker.Core.Enforcement
             }
 
             List<AppRule> currentRules;
+            List<CustomSchedule> currentCustomSchedules;
             lock (_rulesLock)
             {
                 if (_activeRules.Count == 0)
@@ -108,6 +123,7 @@ namespace AppBlocker.Core.Enforcement
                     return 0;
                 }
                 currentRules = _activeRules.ToList();
+                currentCustomSchedules = _customSchedules.ToList();
             }
 
             Process[] processes;
@@ -152,7 +168,7 @@ namespace AppBlocker.Core.Enforcement
                     if (matchingRule != null)
                     {
                         // 4. Verify schedule
-                        if (ScheduleTypes.IsRuleCurrentlyActive(matchingRule.ScheduleType, now))
+                        if (ScheduleTypes.IsRuleCurrentlyActive(matchingRule.ScheduleType, now, currentCustomSchedules, IsFocusModeActive))
                         {
                             var pid = process.Id;
                             try

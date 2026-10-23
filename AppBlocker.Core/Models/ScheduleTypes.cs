@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace AppBlocker.Core.Models
 {
@@ -19,8 +21,18 @@ namespace AppBlocker.Core.Models
             EveningOnly
         };
 
-        public static bool IsRuleCurrentlyActive(string scheduleType, DateTime localTime)
+        public static bool IsRuleCurrentlyActive(
+            string scheduleType, 
+            DateTime localTime, 
+            IEnumerable<CustomSchedule>? customSchedules = null, 
+            bool isFocusModeActive = false)
         {
+            // Focus Mode override: All active rules are enforced 100% of the time during an active focus sprint
+            if (isFocusModeActive)
+            {
+                return true;
+            }
+
             if (string.IsNullOrWhiteSpace(scheduleType) || scheduleType.Equals(Always, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
@@ -48,6 +60,19 @@ namespace AppBlocker.Core.Models
             if (scheduleType.Equals(EveningOnly, StringComparison.OrdinalIgnoreCase))
             {
                 return timeOfDay >= TimeSpan.FromHours(18) && timeOfDay < TimeSpan.FromHours(23);
+            }
+
+            // Check if matching a custom schedule by Name or "Custom:{Id}"
+            if (customSchedules != null)
+            {
+                var matchedCustom = customSchedules.FirstOrDefault(c =>
+                    c.Name.Equals(scheduleType, StringComparison.OrdinalIgnoreCase) ||
+                    scheduleType.Equals($"Custom:{c.Id}", StringComparison.OrdinalIgnoreCase));
+
+                if (matchedCustom != null)
+                {
+                    return matchedCustom.IsActiveAt(localTime);
+                }
             }
 
             return true;

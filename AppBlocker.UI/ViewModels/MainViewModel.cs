@@ -47,7 +47,7 @@ namespace AppBlocker.UI.ViewModels
             LockScreenVM = new LockScreenViewModel(_pinService, OnAuthenticated);
             AppsVM = new AppsViewModel(_ipcClient);
             WebsitesVM = new WebsitesViewModel(_ipcClient);
-            SchedulesVM = new SchedulesViewModel();
+            SchedulesVM = new SchedulesViewModel(_ipcClient);
             LogsVM = new LogsViewModel();
             SettingsVM = new SettingsViewModel(_ipcClient, _pinService, Lock);
 

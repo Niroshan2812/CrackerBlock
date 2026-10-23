@@ -24,6 +24,7 @@ namespace AppBlocker.Service
         private readonly TaskManagerLockdownService _taskManagerLockdownService;
         private readonly BrowserHardeningService _browserHardeningService;
         private readonly WatchdogCoordinator _watchdogCoordinator;
+        private readonly FocusSessionService _focusSessionService;
         private Process? _watchdogProcess;
         private DateTime _lastWatchdogCheck = DateTime.MinValue;
         private NamedPipeIpcServer? _ipcServer;
@@ -45,6 +46,16 @@ namespace AppBlocker.Service
             _taskManagerLockdownService = new TaskManagerLockdownService(TaskManagerLockdownService.DefaultPolicySubKey, msg => _logger.LogInformation("{Message}", msg));
             _browserHardeningService = new BrowserHardeningService(msg => _logger.LogInformation("{Message}", msg));
             _watchdogCoordinator = new WatchdogCoordinator(msg => _logger.LogInformation("{Message}", msg));
+            _focusSessionService = new FocusSessionService(msg => _logger.LogInformation("{Message}", msg));
+            _focusSessionService.SessionStarted += name => SyncFocusState();
+            _focusSessionService.SessionCompleted += name => SyncFocusState();
+        }
+
+        private void SyncFocusState()
+        {
+            var active = _focusSessionService.IsActive;
+            _appLockingEngine.IsFocusModeActive = active;
+            _httpsProxyEngine.IsFocusModeActive = active;
         }
 
         public override async Task StartAsync(CancellationToken cancellationToken)
@@ -131,6 +142,8 @@ namespace AppBlocker.Service
 
             while (!stoppingToken.IsCancellationRequested)
             {
+                SyncFocusState();
+
                 // Check if timed pause expired
                 if (_isBlockingPaused && _pauseUntil.HasValue && DateTime.UtcNow >= _pauseUntil.Value)
                 {
@@ -368,6 +381,13 @@ namespace AppBlocker.Service
 
                 case IpcConstants.Commands.PauseBlocking:
                 {
+                    if (_focusSessionService.IsStrictNuclearMode)
+                    {
+                        var status = _focusSessionService.GetStatus();
+                        var remMins = Math.Ceiling(status.RemainingSeconds / 60.0);
+                        return IpcResponse.Error(request.Id, $"Cannot pause blocking: Strict Nuclear Focus Mode is active for {remMins} more minute(s).");
+                    }
+
                     var payload = request.GetPayload<PauseBlockingDto>();
                     var duration = payload?.DurationMinutes ?? 0;
 
@@ -431,6 +451,11 @@ namespace AppBlocker.Service
 
                 case IpcConstants.Commands.TemporaryUnlockApp:
                 {
+                    if (_focusSessionService.IsStrictNuclearMode)
+                    {
+                        return IpcResponse.Error(request.Id, "Temporary app unlock is disabled while Strict Nuclear Focus Mode is active.");
+                    }
+
                     var payload = request.GetPayload<TemporaryUnlockDto>();
                     if (payload == null || string.IsNullOrWhiteSpace(payload.ProcessName))
                     {
@@ -683,6 +708,200 @@ namespace AppBlocker.Service
                         IsCleanShutdownSignaled = WatchdogCoordinator.IsCleanShutdownSignaled()
                     };
                     return IpcResponse.Ok(request.Id, "Watchdog status retrieved", dto);
+                }
+
+                case IpcConstants.Commands.StartFocusSession:
+                {
+                    var dto = request.GetPayload<StartFocusSessionDto>() ?? new StartFocusSessionDto();
+                    _focusSessionService.StartSession(dto.DurationMinutes, dto.IsStrictNuclearMode, dto.SessionName);
+                    SyncFocusState();
+
+                    try
+                    {
+                        await using var db = AppBlockerDbContext.CreateContext();
+                        db.Logs.Add(new SystemLog
+                        {
+                            Timestamp = DateTime.UtcNow,
+                            EventType = "Focus Session Started",
+                            Description = $"Started '{dto.SessionName}' for {dto.DurationMinutes}m (Strict Nuclear: {dto.IsStrictNuclearMode})."
+                        });
+                        await db.SaveChangesAsync();
+                    }
+                    catch { }
+
+                    var status = _focusSessionService.GetStatus();
+                    return IpcResponse.Ok(request.Id, $"Focus session '{dto.SessionName}' started.", new FocusSessionStatusDto
+                    {
+                        IsActive = status.IsActive,
+                        SessionName = status.SessionName,
+                        TotalSeconds = status.TotalSeconds,
+                        RemainingSeconds = status.RemainingSeconds,
+                        IsStrictNuclearMode = status.IsStrictNuclearMode,
+                        EndsAt = status.EndsAt
+                    });
+                }
+
+                case IpcConstants.Commands.StopFocusSession:
+                {
+                    var force = false;
+                    if (!string.IsNullOrEmpty(request.Payload))
+                    {
+                        try
+                        {
+                            var doc = System.Text.Json.JsonDocument.Parse(request.Payload);
+                            if (doc.RootElement.TryGetProperty("Force", out var forceProp))
+                            {
+                                force = forceProp.GetBoolean();
+                            }
+                        }
+                        catch { }
+                    }
+
+                    var stopped = _focusSessionService.StopSession(force);
+                    SyncFocusState();
+
+                    if (!stopped)
+                    {
+                        return IpcResponse.Error(request.Id, "Cannot stop focus session: Strict Nuclear Mode is actively locked down.");
+                    }
+
+                    try
+                    {
+                        await using var db = AppBlockerDbContext.CreateContext();
+                        db.Logs.Add(new SystemLog
+                        {
+                            Timestamp = DateTime.UtcNow,
+                            EventType = "Focus Session Stopped",
+                            Description = "Focus session stopped by user."
+                        });
+                        await db.SaveChangesAsync();
+                    }
+                    catch { }
+
+                    return IpcResponse.Ok(request.Id, "Focus session stopped successfully.");
+                }
+
+                case IpcConstants.Commands.GetFocusSessionStatus:
+                {
+                    SyncFocusState();
+                    var status = _focusSessionService.GetStatus();
+                    return IpcResponse.Ok(request.Id, "Focus session status retrieved", new FocusSessionStatusDto
+                    {
+                        IsActive = status.IsActive,
+                        SessionName = status.SessionName,
+                        TotalSeconds = status.TotalSeconds,
+                        RemainingSeconds = status.RemainingSeconds,
+                        IsStrictNuclearMode = status.IsStrictNuclearMode,
+                        EndsAt = status.EndsAt
+                    });
+                }
+
+                case IpcConstants.Commands.GetCustomSchedules:
+                {
+                    await using var db = AppBlockerDbContext.CreateContext();
+                    var list = await db.CustomSchedules.ToListAsync();
+                    var now = DateTime.Now;
+                    var dtos = list.Select(s => new CustomScheduleDto
+                    {
+                        Id = s.Id,
+                        Name = s.Name,
+                        StartTime = s.StartTime,
+                        EndTime = s.EndTime,
+                        DaysOfWeek = s.DaysOfWeek,
+                        IsActive = s.IsActive,
+                        IsActiveNow = s.IsActiveAt(now)
+                    }).ToList();
+                    return IpcResponse.Ok(request.Id, "Custom schedules retrieved", dtos);
+                }
+
+                case IpcConstants.Commands.AddCustomSchedule:
+                {
+                    var dto = request.GetPayload<CustomScheduleDto>();
+                    if (dto == null || string.IsNullOrWhiteSpace(dto.Name))
+                    {
+                        return IpcResponse.Error(request.Id, "Schedule Name is required.");
+                    }
+
+                    await using var db = AppBlockerDbContext.CreateContext();
+                    var schedule = new CustomSchedule
+                    {
+                        Name = dto.Name.Trim(),
+                        StartTime = dto.StartTime ?? "09:00",
+                        EndTime = dto.EndTime ?? "17:00",
+                        DaysOfWeek = string.IsNullOrWhiteSpace(dto.DaysOfWeek) ? "Mon,Tue,Wed,Thu,Fri" : dto.DaysOfWeek,
+                        IsActive = true
+                    };
+                    db.CustomSchedules.Add(schedule);
+                    await db.SaveChangesAsync();
+
+                    await _appLockingEngine.LoadRulesAsync();
+                    await _httpsProxyEngine.LoadRulesFromDatabaseAsync();
+
+                    dto.Id = schedule.Id;
+                    dto.IsActive = schedule.IsActive;
+                    dto.IsActiveNow = schedule.IsActiveAt(DateTime.Now);
+
+                    return IpcResponse.Ok(request.Id, $"Custom schedule '{schedule.Name}' created successfully.", dto);
+                }
+
+                case IpcConstants.Commands.DeleteCustomSchedule:
+                {
+                    int id = 0;
+                    if (!string.IsNullOrEmpty(request.Payload))
+                    {
+                        try
+                        {
+                            var doc = System.Text.Json.JsonDocument.Parse(request.Payload);
+                            if (doc.RootElement.TryGetProperty("Id", out var idProp))
+                            {
+                                id = idProp.GetInt32();
+                            }
+                        }
+                        catch { }
+                    }
+
+                    await using var db = AppBlockerDbContext.CreateContext();
+                    var target = await db.CustomSchedules.FindAsync(id);
+                    if (target != null)
+                    {
+                        db.CustomSchedules.Remove(target);
+                        await db.SaveChangesAsync();
+
+                        await _appLockingEngine.LoadRulesAsync();
+                        await _httpsProxyEngine.LoadRulesFromDatabaseAsync();
+                        return IpcResponse.Ok(request.Id, "Schedule deleted.");
+                    }
+                    return IpcResponse.Error(request.Id, "Schedule not found.");
+                }
+
+                case IpcConstants.Commands.ToggleCustomSchedule:
+                {
+                    int id = 0;
+                    if (!string.IsNullOrEmpty(request.Payload))
+                    {
+                        try
+                        {
+                            var doc = System.Text.Json.JsonDocument.Parse(request.Payload);
+                            if (doc.RootElement.TryGetProperty("Id", out var idProp))
+                            {
+                                id = idProp.GetInt32();
+                            }
+                        }
+                        catch { }
+                    }
+
+                    await using var db = AppBlockerDbContext.CreateContext();
+                    var target = await db.CustomSchedules.FindAsync(id);
+                    if (target != null)
+                    {
+                        target.IsActive = !target.IsActive;
+                        await db.SaveChangesAsync();
+
+                        await _appLockingEngine.LoadRulesAsync();
+                        await _httpsProxyEngine.LoadRulesFromDatabaseAsync();
+                        return IpcResponse.Ok(request.Id, $"Schedule '{target.Name}' active state: {target.IsActive}", new { IsActive = target.IsActive });
+                    }
+                    return IpcResponse.Error(request.Id, "Schedule not found.");
                 }
 
                 default:

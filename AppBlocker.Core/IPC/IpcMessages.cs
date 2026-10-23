@@ -114,4 +114,32 @@ namespace AppBlocker.Core.IPC
         public int WatchdogPid { get; set; }
         public bool IsCleanShutdownSignaled { get; set; }
     }
+
+    public class StartFocusSessionDto
+    {
+        public int DurationMinutes { get; set; } = 25;
+        public bool IsStrictNuclearMode { get; set; } = false;
+        public string SessionName { get; set; } = "Pomodoro Sprint";
+    }
+
+    public class FocusSessionStatusDto
+    {
+        public bool IsActive { get; set; }
+        public string SessionName { get; set; } = "Focus Session";
+        public int TotalSeconds { get; set; }
+        public int RemainingSeconds { get; set; }
+        public bool IsStrictNuclearMode { get; set; }
+        public DateTime? EndsAt { get; set; }
+    }
+
+    public class CustomScheduleDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string StartTime { get; set; } = "09:00";
+        public string EndTime { get; set; } = "17:00";
+        public string DaysOfWeek { get; set; } = "Mon,Tue,Wed,Thu,Fri";
+        public bool IsActive { get; set; } = true;
+        public bool IsActiveNow { get; set; }
+    }
 }

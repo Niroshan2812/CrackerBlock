@@ -4,72 +4,278 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="700" d:DesignWidth="900">
+             d:DesignHeight="1000" d:DesignWidth="950">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="24">
             <!-- Header -->
-            <StackPanel Margin="0,0,0,20">
-                <TextBlock Text="Enforcement Schedules &amp; Time Clock" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
-                <TextBlock Text="Manage active blocking time windows for work, focus hours, and weekends." FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
+            <StackPanel Margin="0,0,0,24">
+                <TextBlock Text="Enforcement Schedules &amp; Pomodoro Focus Timer" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
+                <TextBlock Text="Harness structured high-intensity focus sprints with Strict Nuclear Lock, or automate recurring time windows." FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
             </StackPanel>
 
-            <!-- Real-time Clock Card -->
-            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,24">
+            <!-- 1. Hero Card: Interactive Pomodoro Focus Sprint -->
+            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,24" Padding="24" Background="#181B2B" BorderBrush="#352F5A" BorderThickness="1.5">
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="LOCAL SYSTEM TIME" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentPurpleBrush}" Margin="0,0,0,4" />
-                        <TextBlock Text="{Binding CurrentTimeString}" FontSize="36" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
-                        <TextBlock Text="{Binding CurrentDateString}" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
-                    </StackPanel>
-
-                    <Border Grid.Column="1" Background="#261E40" BorderBrush="{StaticResource AccentPurpleBrush}" BorderThickness="1" CornerRadius="8" Padding="16,12" VerticalAlignment="Center">
-                        <StackPanel>
-                            <TextBlock Text="Engine Precision" FontSize="11" Foreground="{StaticResource TextMutedBrush}" />
-                            <TextBlock Text="Evaluated every 1.5s" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource SuccessBrush}" Margin="0,2,0,0" />
+                    <!-- Section Title -->
+                    <Grid Grid.Row="0" Margin="0,0,0,20">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🍅 " FontSize="18" VerticalAlignment="Center" />
+                            <TextBlock Text="Interactive Focus Timer &amp; Nuclear Mode" FontSize="17" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
                         </StackPanel>
-                    </Border>
+                        <Border HorizontalAlignment="Right" CornerRadius="12" Padding="12,5"
+                                Background="{Binding IsFocusActive, Converter={StaticResource BoolToVisConverter}}">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="#1A10B981" />
+                                    <Setter Property="BorderBrush" Value="{StaticResource SuccessBrush}" />
+                                    <Setter Property="BorderThickness" Value="1" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsStrictNuclearMode}" Value="True">
+                                            <Setter Property="Background" Value="#26EF4444" />
+                                            <Setter Property="BorderBrush" Value="{StaticResource DangerBrush}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding IsFocusActive}" Value="False">
+                                            <Setter Property="Background" Value="#1E2338" />
+                                            <Setter Property="BorderBrush" Value="{StaticResource BorderCardBrush}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse Width="8" Height="8" Margin="0,0,6,0">
+                                    <Ellipse.Style>
+                                        <Style TargetType="Ellipse">
+                                            <Setter Property="Fill" Value="{StaticResource SuccessBrush}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsStrictNuclearMode}" Value="True">
+                                                    <Setter Property="Fill" Value="{StaticResource DangerBrush}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsFocusActive}" Value="False">
+                                                    <Setter Property="Fill" Value="{StaticResource TextMutedBrush}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Ellipse.Style>
+                                </Ellipse>
+                                <TextBlock FontSize="12" FontWeight="Bold">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="SPRINT ACTIVE" />
+                                            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsStrictNuclearMode}" Value="True">
+                                                    <Setter Property="Text" Value="🔒 NUCLEAR LOCK ACTIVE" />
+                                                    <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding IsFocusActive}" Value="False">
+                                                    <Setter Property="Text" Value="TIMER IDLE" />
+                                                    <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- Main Timer Row -->
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="280" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Left: Circular Countdown Display -->
+                        <Border Grid.Column="0" Background="#121422" BorderBrush="#2D284D" BorderThickness="1" CornerRadius="16" Padding="20" Margin="0,0,24,0">
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <TextBlock Text="{Binding FocusSessionName}" FontSize="12" FontWeight="Bold" Foreground="{StaticResource AccentPurpleBrush}" HorizontalAlignment="Center" Margin="0,0,0,6" />
+                                
+                                <!-- Large Glowing Countdown -->
+                                <TextBlock Text="{Binding RemainingTimeDisplay}" FontSize="54" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" FontFamily="Consolas, Segoe UI" />
+                                
+                                <!-- Progress Bar -->
+                                <ProgressBar Value="{Binding ProgressPercentage}" Maximum="100" Height="6" Margin="0,16,0,12" Background="#1E2338" Foreground="{StaticResource AccentPurpleBrush}" BorderThickness="0" />
+
+                                <TextBlock Text="{Binding FocusStatusMessage}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" TextAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Right: Presets & Nuclear Mode Controls -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <!-- Preset Buttons -->
+                            <TextBlock Text="Select Sprint Preset:" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10" />
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
+                                <Button Content="🍅 25m Pomodoro"
+                                        Command="{Binding SelectPresetCommand}"
+                                        CommandParameter="25"
+                                        Style="{StaticResource ModernSecondaryButton}"
+                                        Height="38" Margin="0,0,10,0" Padding="14,6" />
+                                <Button Content="⚡ 50m Deep Work"
+                                        Command="{Binding SelectPresetCommand}"
+                                        CommandParameter="50"
+                                        Style="{StaticResource ModernSecondaryButton}"
+                                        Height="38" Margin="0,0,10,0" Padding="14,6" />
+                                <Button Content="🌊 90m Flow State"
+                                        Command="{Binding SelectPresetCommand}"
+                                        CommandParameter="90"
+                                        Style="{StaticResource ModernSecondaryButton}"
+                                        Height="38" Margin="0,0,10,0" Padding="14,6" />
+                            </StackPanel>
+
+                            <!-- Strict Nuclear Mode Switch -->
+                            <Border Background="#1C182A" BorderBrush="#3B2648" BorderThickness="1" CornerRadius="10" Padding="14" Margin="0,0,0,18">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="⚡ Strict Nuclear Mode" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}" />
+                                        <TextBlock Text="Completely disables Master PIN pause and bypasses until the countdown finishes. No cheating." FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
+                                    </StackPanel>
+                                    <CheckBox Grid.Column="1"
+                                              IsChecked="{Binding IsStrictNuclearMode}"
+                                              IsEnabled="{Binding IsFocusActive, Converter={StaticResource InverseBoolConverter}}"
+                                              VerticalAlignment="Center"
+                                              Cursor="Hand" />
+                                </Grid>
+                            </Border>
+
+                            <!-- Start / End Buttons -->
+                            <Grid>
+                                <Button Content="▶️ Start Focus Sprint"
+                                        Command="{Binding StartFocusSessionCommand}"
+                                        Style="{StaticResource ModernPrimaryButton}"
+                                        Height="44" FontSize="14"
+                                        Visibility="{Binding IsFocusActive, Converter={StaticResource InverseBoolToVisConverter}}" />
+
+                                <Button Content="⏹️ End Focus Session"
+                                        Command="{Binding StopFocusSessionCommand}"
+                                        Style="{StaticResource ModernDangerButton}"
+                                        Height="44" FontSize="14"
+                                        Visibility="{Binding IsFocusActive, Converter={StaticResource BoolToVisConverter}}" />
+                            </Grid>
+                        </StackPanel>
+                    </Grid>
                 </Grid>
             </Border>
 
-            <!-- Schedules Grid -->
-            <Border Style="{StaticResource ModernCard}">
+            <!-- 2. Custom Time Windows Manager -->
+            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,24">
                 <StackPanel>
-                    <TextBlock Text="Configured Time Windows" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,16" />
+                    <Grid Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="Custom Time Windows" FontSize="17" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
+                            <TextBlock Text="Create specialized blocking windows tailored to your work, study blocks, and evening routines." FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
+                        </StackPanel>
+                    </Grid>
 
-                    <ItemsControl ItemsSource="{Binding ScheduleItems}">
+                    <!-- Add Schedule Form -->
+                    <Border Background="{StaticResource BgSidebarBrush}" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,16">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="2*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Name Input -->
+                                <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                    <TextBlock Text="Schedule Name" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
+                                    <TextBox Text="{Binding NewScheduleName, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource ModernTextBox}"
+                                             Height="36" />
+                                </StackPanel>
+
+                                <!-- Start Time -->
+                                <StackPanel Grid.Column="1" Margin="0,0,12,0">
+                                    <TextBlock Text="Start (HH:mm)" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
+                                    <TextBox Text="{Binding NewScheduleStartTime, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource ModernTextBox}"
+                                             Height="36" />
+                                </StackPanel>
+
+                                <!-- End Time -->
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="End (HH:mm)" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
+                                    <TextBox Text="{Binding NewScheduleEndTime, UpdateSourceTrigger=PropertyChanged}"
+                                             Style="{StaticResource ModernTextBox}"
+                                             Height="36" />
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Days of Week Selector -->
+                            <Grid Margin="0,0,0,14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0" Text="Active Days:" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,16,0" />
+
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <CheckBox Content="Mon" IsChecked="{Binding DayMon}" Margin="0,0,12,0" Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <CheckBox Content="Tue" IsChecked="{Binding DayTue}" Margin="0,0,12,0" Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <CheckBox Content="Wed" IsChecked="{Binding DayWed}" Margin="0,0,12,0" Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <CheckBox Content="Thu" IsChecked="{Binding DayThu}" Margin="0,0,12,0" Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <CheckBox Content="Fri" IsChecked="{Binding DayFri}" Margin="0,0,12,0" Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <CheckBox Content="Sat" IsChecked="{Binding DaySat}" Margin="0,0,12,0" Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <CheckBox Content="Sun" IsChecked="{Binding DaySun}" Margin="0,0,12,0" Foreground="{StaticResource TextPrimaryBrush}" />
+                                </StackPanel>
+
+                                <Button Grid.Column="2"
+                                        Content="➕ Add Time Window"
+                                        Command="{Binding CreateCustomScheduleCommand}"
+                                        Style="{StaticResource ModernPrimaryButton}"
+                                        Height="36" Padding="16,6" />
+                            </Grid>
+
+                            <TextBlock Text="{Binding ScheduleStatusMessage}" FontSize="12" Foreground="{StaticResource SuccessBrush}"
+                                       Visibility="{Binding ScheduleStatusMessage, Converter={StaticResource StringNotEmptyToVisConverter}}" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Custom Schedules List -->
+                    <ItemsControl ItemsSource="{Binding CustomScheduleItems}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Background="{StaticResource BgSidebarBrush}" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,12">
+                                <Border Background="{StaticResource BgSidebarBrush}" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" CornerRadius="8" Padding="16" Margin="0,0,0,10">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="*" />
                                             <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
 
                                         <!-- Icon -->
-                                        <Border Grid.Column="0" Width="40" Height="40" CornerRadius="8" Background="#1E2338" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" Margin="0,0,16,0">
-                                            <TextBlock Text="⏱️" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        <Border Grid.Column="0" Width="38" Height="38" CornerRadius="8" Background="#1E2338" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" Margin="0,0,16,0">
+                                            <TextBlock Text="📅" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                         </Border>
 
-                                        <!-- Schedule Details -->
+                                        <!-- Details -->
                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="{Binding Name}" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,10,0" />
-                                                <Border CornerRadius="4" Padding="6,2" Background="#22263B">
+                                                <Border CornerRadius="4" Padding="6,2" Background="#22263B" Margin="0,0,6,0">
                                                     <TextBlock Text="{Binding TimeWindow}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="SemiBold" />
                                                 </Border>
+                                                <Border CornerRadius="4" Padding="6,2" Background="#1A1E30">
+                                                    <TextBlock Text="{Binding DaysOfWeek}" FontSize="10" Foreground="{StaticResource AccentPurpleBrush}" FontWeight="SemiBold" />
+                                                </Border>
                                             </StackPanel>
-                                            <TextBlock Text="{Binding Description}" FontSize="12" Foreground="{StaticResource TextMutedBrush}" Margin="0,4,0,0" />
                                         </StackPanel>
 
                                         <!-- Active State Pill -->
-                                        <Border Grid.Column="2" CornerRadius="12" Padding="12,6" VerticalAlignment="Center">
+                                        <Border Grid.Column="2" CornerRadius="12" Padding="12,5" VerticalAlignment="Center" Margin="0,0,16,0">
                                             <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Setter Property="Background" Value="#1A2D24" />
@@ -96,7 +302,137 @@
                                                         </Style>
                                                     </Ellipse.Style>
                                                 </Ellipse>
-                                                <TextBlock FontSize="12" FontWeight="SemiBold">
+                                                <TextBlock FontSize="11" FontWeight="SemiBold">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Text" Value="ACTIVE NOW" />
+                                                            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsActiveNow}" Value="False">
+                                                                    <Setter Property="Text" Value="INACTIVE" />
+                                                                    <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </StackPanel>
+                                        </Border>
+
+                                        <!-- Actions (Toggle & Delete) -->
+                                        <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Button Content="{Binding IsActive, Converter={StaticResource BoolToVisConverter}}"
+                                                    Command="{Binding DataContext.ToggleCustomScheduleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding Id}"
+                                                    Height="32" Padding="10,4" Margin="0,0,8,0">
+                                                <Button.Style>
+                                                    <Style TargetType="Button" BasedOn="{StaticResource ModernSecondaryButton}">
+                                                        <Setter Property="Content" Value="Active" />
+                                                        <Setter Property="Foreground" Value="{StaticResource SuccessBrush}" />
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                                <Setter Property="Content" Value="Paused" />
+                                                                <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </Button.Style>
+                                            </Button>
+
+                                            <Button Content="🗑️"
+                                                    Command="{Binding DataContext.DeleteCustomScheduleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding Id}"
+                                                    Style="{StaticResource ModernDangerButton}"
+                                                    Height="32" Padding="8,4" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <!-- 3. Standard Presets & System Clock -->
+            <Border Style="{StaticResource ModernCard}">
+                <StackPanel>
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Standard Preset Schedules" FontSize="17" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
+                            <TextBlock Text="Built-in business and focus presets evaluated by the guardian engine." FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
+                        </StackPanel>
+
+                        <!-- System Clock -->
+                        <Border Grid.Column="1" Background="#261E40" BorderBrush="{StaticResource AccentPurpleBrush}" BorderThickness="1" CornerRadius="8" Padding="14,8" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⏰ " FontSize="14" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding CurrentTimeString}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                                <TextBlock Text="{Binding CurrentDateString}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <ItemsControl ItemsSource="{Binding PresetScheduleItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{StaticResource BgSidebarBrush}" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,10">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Icon -->
+                                        <Border Grid.Column="0" Width="36" Height="36" CornerRadius="8" Background="#1E2338" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" Margin="0,0,14,0">
+                                            <TextBlock Text="⏱️" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+
+                                        <!-- Schedule Details -->
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,10,0" />
+                                                <Border CornerRadius="4" Padding="6,2" Background="#22263B">
+                                                    <TextBlock Text="{Binding TimeWindow}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" FontWeight="SemiBold" />
+                                                </Border>
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding Description}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
+                                        </StackPanel>
+
+                                        <!-- Active State Pill -->
+                                        <Border Grid.Column="2" CornerRadius="12" Padding="12,5" VerticalAlignment="Center">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="#1A2D24" />
+                                                    <Setter Property="BorderBrush" Value="{StaticResource SuccessBrush}" />
+                                                    <Setter Property="BorderThickness" Value="1" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsActiveNow}" Value="False">
+                                                            <Setter Property="Background" Value="#222638" />
+                                                            <Setter Property="BorderBrush" Value="{StaticResource BorderCardBrush}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Ellipse Width="8" Height="8" Margin="0,0,6,0">
+                                                    <Ellipse.Style>
+                                                        <Style TargetType="Ellipse">
+                                                            <Setter Property="Fill" Value="{StaticResource SuccessBrush}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsActiveNow}" Value="False">
+                                                                    <Setter Property="Fill" Value="{StaticResource TextMutedBrush}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Ellipse.Style>
+                                                </Ellipse>
+                                                <TextBlock FontSize="11" FontWeight="SemiBold">
                                                     <TextBlock.Style>
                                                         <Style TargetType="TextBlock">
                                                             <Setter Property="Text" Value="ACTIVE NOW" />

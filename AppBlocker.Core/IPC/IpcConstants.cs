@@ -25,6 +25,13 @@ namespace AppBlocker.Core.IPC
             public const string SetBrowserHardeningState = "SetBrowserHardeningState";
             public const string GetBrowserHardeningState = "GetBrowserHardeningState";
             public const string GetWatchdogStatus = "GetWatchdogStatus";
+            public const string StartFocusSession = "StartFocusSession";
+            public const string StopFocusSession = "StopFocusSession";
+            public const string GetFocusSessionStatus = "GetFocusSessionStatus";
+            public const string GetCustomSchedules = "GetCustomSchedules";
+            public const string AddCustomSchedule = "AddCustomSchedule";
+            public const string DeleteCustomSchedule = "DeleteCustomSchedule";
+            public const string ToggleCustomSchedule = "ToggleCustomSchedule";
         }
     }
 }

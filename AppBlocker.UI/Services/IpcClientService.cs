@@ -136,5 +136,56 @@ namespace AppBlocker.UI.Services
             }
             return new WatchdogStatusDto { IsWatchdogActive = false };
         }
+
+        public async Task<IpcResponse> StartFocusSessionAsync(int durationMinutes, bool isStrictNuclearMode, string sessionName = "Pomodoro Sprint")
+        {
+            var dto = new StartFocusSessionDto
+            {
+                DurationMinutes = durationMinutes,
+                IsStrictNuclearMode = isStrictNuclearMode,
+                SessionName = sessionName
+            };
+            return await _client.SendCommandAsync(IpcConstants.Commands.StartFocusSession, dto);
+        }
+
+        public async Task<IpcResponse> StopFocusSessionAsync(bool force = false)
+        {
+            return await _client.SendCommandAsync(IpcConstants.Commands.StopFocusSession, new { Force = force });
+        }
+
+        public async Task<FocusSessionStatusDto> GetFocusSessionStatusAsync()
+        {
+            var response = await _client.SendCommandAsync(IpcConstants.Commands.GetFocusSessionStatus);
+            if (response.Success && !string.IsNullOrEmpty(response.Payload))
+            {
+                return response.GetPayload<FocusSessionStatusDto>() ?? new FocusSessionStatusDto();
+            }
+            return new FocusSessionStatusDto { IsActive = false };
+        }
+
+        public async Task<List<CustomScheduleDto>> GetCustomSchedulesAsync()
+        {
+            var response = await _client.SendCommandAsync(IpcConstants.Commands.GetCustomSchedules);
+            if (response.Success && !string.IsNullOrEmpty(response.Payload))
+            {
+                return response.GetPayload<List<CustomScheduleDto>>() ?? new List<CustomScheduleDto>();
+            }
+            return new List<CustomScheduleDto>();
+        }
+
+        public async Task<IpcResponse> AddCustomScheduleAsync(CustomScheduleDto dto)
+        {
+            return await _client.SendCommandAsync(IpcConstants.Commands.AddCustomSchedule, dto);
+        }
+
+        public async Task<IpcResponse> DeleteCustomScheduleAsync(int id)
+        {
+            return await _client.SendCommandAsync(IpcConstants.Commands.DeleteCustomSchedule, new { Id = id });
+        }
+
+        public async Task<IpcResponse> ToggleCustomScheduleAsync(int id)
+        {
+            return await _client.SendCommandAsync(IpcConstants.Commands.ToggleCustomSchedule, new { Id = id });
+        }
     }
 }
