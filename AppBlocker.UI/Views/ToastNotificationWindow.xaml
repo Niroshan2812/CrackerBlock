@@ -1,0 +1,174 @@
+<Window x:Class="AppBlocker.UI.Views.ToastNotificationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="CrackerBlock Notification"
+        Width="380"
+        SizeToContent="Height"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowInTaskbar="False"
+        ShowActivated="False"
+        Focusable="False">
+    <Window.Resources>
+        <Storyboard x:Key="SlideInAnimation">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.25">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                             From="25" To="0" Duration="0:0:0.25">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+        <Storyboard x:Key="SlideOutAnimation">
+            <DoubleAnimation Storyboard.TargetProperty="Opacity" From="1" To="0" Duration="0:0:0.2">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+            <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+                             From="0" To="20" Duration="0:0:0.2">
+                <DoubleAnimation.EasingFunction>
+                    <CubicEase EasingMode="EaseIn" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+    </Window.Resources>
+
+    <Grid Margin="12" RenderTransformOrigin="0.5,0.5">
+        <Grid.RenderTransform>
+            <TranslateTransform x:Name="TransformRoot" Y="0" />
+        </Grid.RenderTransform>
+
+        <!-- Notification Container Card -->
+        <Border x:Name="CardBorder"
+                CornerRadius="14"
+                Background="#181B2B"
+                BorderThickness="1.5"
+                Padding="16,14">
+            <Border.BorderBrush>
+                <SolidColorBrush x:Name="AccentBorderBrush" Color="#8B5CF6" />
+            </Border.BorderBrush>
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="22" Direction="270" ShadowDepth="4" Opacity="0.55" Color="#000000" />
+            </Border.Effect>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Left Icon Circle -->
+                <Border Grid.Column="0"
+                        Width="42" Height="42"
+                        CornerRadius="21"
+                        VerticalAlignment="Top"
+                        Margin="0,2,14,0">
+                    <Border.Background>
+                        <SolidColorBrush x:Name="IconBgBrush" Color="#252A42" />
+                    </Border.Background>
+                    <TextBlock x:Name="IconTextBlock"
+                               Text="🛡️"
+                               FontSize="20"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center" />
+                </Border>
+
+                <!-- Center Content -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <!-- Top Category & Time Row -->
+                    <Grid Margin="0,0,0,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border HorizontalAlignment="Left" CornerRadius="4" Padding="6,2">
+                            <Border.Background>
+                                <SolidColorBrush x:Name="CategoryBgBrush" Color="#282240" />
+                            </Border.Background>
+                            <TextBlock x:Name="CategoryTextBlock"
+                                       Text="GUARDIAN ALERT"
+                                       FontSize="10"
+                                       FontWeight="Bold"
+                                       Foreground="#A78BFA" />
+                        </Border>
+
+                        <TextBlock x:Name="TimeTextBlock"
+                                   Grid.Column="1"
+                                   Text="12:00:00"
+                                   FontSize="10.5"
+                                   Foreground="#64748B"
+                                   VerticalAlignment="Center"
+                                   Margin="6,0,0,0" />
+                    </Grid>
+
+                    <!-- Title -->
+                    <TextBlock x:Name="TitleTextBlock"
+                               Text="Notification Title"
+                               FontSize="13.5"
+                               FontWeight="SemiBold"
+                               Foreground="#F8FAFC"
+                               TextWrapping="NoWrap"
+                               TextTrimming="CharacterEllipsis"
+                               Margin="0,0,0,3" />
+
+                    <!-- Description Message -->
+                    <TextBlock x:Name="MessageTextBlock"
+                               Text="Notification description details appear here clearly for user awareness."
+                               FontSize="12"
+                               Foreground="#94A3B8"
+                               TextWrapping="Wrap"
+                               LineHeight="16"
+                               MaxHeight="48"
+                               TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+
+                <!-- Right Dismiss Button -->
+                <Button Grid.Column="2"
+                        Click="DismissButton_Click"
+                        VerticalAlignment="Top"
+                        HorizontalAlignment="Right"
+                        Width="24" Height="24"
+                        Margin="8,-4,-4,0"
+                        Cursor="Hand"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        Foreground="#64748B"
+                        FontSize="14"
+                        FontWeight="Bold"
+                        Content="✕">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="btnBorder" Background="Transparent" CornerRadius="12">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Foreground" Value="#F8FAFC" />
+                                                <Setter TargetName="btnBorder" Property="Background" Value="#32374F" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

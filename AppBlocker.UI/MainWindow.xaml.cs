@@ -12,6 +12,7 @@ namespace AppBlocker.UI
     {
         private MainViewModel? ViewModel => DataContext as MainViewModel;
         private SystemTrayService? _trayService;
+        private AuditLogNotificationWatcher? _logNotificationWatcher;
         private bool _isExplicitExit = false;
 
         public MainWindow()
@@ -29,6 +30,8 @@ namespace AppBlocker.UI
             try
             {
                 _trayService = new SystemTrayService();
+                NotificationService.Instance.SetTrayService(_trayService);
+
                 _trayService.OpenDashboardRequested += OnOpenDashboardRequested;
                 _trayService.LockRequested += OnLockRequested;
                 _trayService.PauseRequested += OnTrayPauseRequested;
@@ -56,6 +59,16 @@ namespace AppBlocker.UI
                 await ViewModel.InitializeAsync();
                 _trayService?.UpdateState(ViewModel.IsBlockingPaused);
             }
+
+            try
+            {
+                _logNotificationWatcher = new AuditLogNotificationWatcher();
+                await _logNotificationWatcher.StartAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Notification watcher start error: {ex.Message}");
+            }
         }
 
         private void MainWindow_Closing(object? sender, CancelEventArgs e)
@@ -69,8 +82,12 @@ namespace AppBlocker.UI
             }
         }
 
-        private void MainWindow_Closed(object? sender, EventArgs e)
+        private async void MainWindow_Closed(object? sender, EventArgs e)
         {
+            if (_logNotificationWatcher != null)
+            {
+                await _logNotificationWatcher.StopAsync();
+            }
             _trayService?.Dispose();
         }
 

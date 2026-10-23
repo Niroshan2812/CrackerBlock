@@ -55,11 +55,42 @@ namespace AppBlocker.UI.ViewModels
         [ObservableProperty]
         private string _generalStatusMessage = string.Empty;
 
+        // Desktop Notifications & Real-Time Alerts
+        [ObservableProperty]
+        private bool _isToastNotificationsEnabled = true;
+
+        [ObservableProperty]
+        private bool _isNotificationSoundEnabled = true;
+
+        [ObservableProperty]
+        private bool _isBalloonAlertsEnabled = true;
+
+        private int _testNotificationIndex = 0;
+
         public SettingsViewModel(IpcClientService ipcClient, IPinSecurityService pinService, Action onLockDashboard)
         {
             _ipcClient = ipcClient;
             _pinService = pinService;
             _onLockDashboard = onLockDashboard;
+
+            _isToastNotificationsEnabled = NotificationService.Instance.IsToastEnabled;
+            _isNotificationSoundEnabled = NotificationService.Instance.IsSoundEnabled;
+            _isBalloonAlertsEnabled = NotificationService.Instance.IsBalloonEnabled;
+        }
+
+        partial void OnIsToastNotificationsEnabledChanged(bool value)
+        {
+            NotificationService.Instance.IsToastEnabled = value;
+        }
+
+        partial void OnIsNotificationSoundEnabledChanged(bool value)
+        {
+            NotificationService.Instance.IsSoundEnabled = value;
+        }
+
+        partial void OnIsBalloonAlertsEnabledChanged(bool value)
+        {
+            NotificationService.Instance.IsBalloonEnabled = value;
         }
 
         public async Task RefreshStateAsync()
@@ -191,6 +222,13 @@ namespace AppBlocker.UI.ViewModels
         private void LockDashboard()
         {
             _onLockDashboard();
+        }
+
+        [RelayCommand]
+        private void SendTestNotification()
+        {
+            NotificationService.Instance.ShowTestNotification(_testNotificationIndex++);
+            GeneralStatusMessage = "🔔 Test alert sent! Check the bottom-right corner of your desktop.";
         }
 
         private void SetPinStatus(string msg, bool success)

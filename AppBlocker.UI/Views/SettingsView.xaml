@@ -237,6 +237,93 @@
                 </StackPanel>
             </Border>
 
+            <!-- Desktop Notifications & Real-Time Alerts Card -->
+            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,20">
+                <StackPanel>
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Desktop Toast Notifications &amp; Real-Time Alerts" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                            <TextBlock Text="Non-activating desktop HUD alerts and system tray notifications when applications/sites are restricted or focus milestones occur." FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
+                        </StackPanel>
+
+                        <Button Grid.Column="1"
+                                Content="🔔 Send Test Notification"
+                                Command="{Binding SendTestNotificationCommand}"
+                                Style="{StaticResource ModernPrimaryButton}"
+                                VerticalAlignment="Center"
+                                Height="36" Padding="14,6" />
+                    </Grid>
+
+                    <!-- Alert Preference Rows -->
+                    <StackPanel>
+                        <!-- 1. Floating Desktop Toasts -->
+                        <Border Background="{StaticResource BgSidebarBrush}" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="Floating Desktop HUD Toasts" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <TextBlock Text="Smooth glassmorphic toast windows in the bottom-right corner without stealing focus or interrupting full-screen games." FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
+                                </StackPanel>
+
+                                <CheckBox Grid.Column="1"
+                                          IsChecked="{Binding IsToastNotificationsEnabled}"
+                                          VerticalAlignment="Center"
+                                          Cursor="Hand" />
+                            </Grid>
+                        </Border>
+
+                        <!-- 2. Sound Effects -->
+                        <Border Background="{StaticResource BgSidebarBrush}" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="Notification Sound Chimes" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <TextBlock Text="Play subtle audio cues when anti-tamper shields activate or focus sessions complete." FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
+                                </StackPanel>
+
+                                <CheckBox Grid.Column="1"
+                                          IsChecked="{Binding IsNotificationSoundEnabled}"
+                                          VerticalAlignment="Center"
+                                          Cursor="Hand" />
+                            </Grid>
+                        </Border>
+
+                        <!-- 3. System Tray Balloon Tips -->
+                        <Border Background="{StaticResource BgSidebarBrush}" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" CornerRadius="8" Padding="14">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="Windows Action Center &amp; System Tray Alerts" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <TextBlock Text="Mirror alerts into the native Windows notification area and system tray icon balloon tips." FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
+                                </StackPanel>
+
+                                <CheckBox Grid.Column="1"
+                                          IsChecked="{Binding IsBalloonAlertsEnabled}"
+                                          VerticalAlignment="Center"
+                                          Cursor="Hand" />
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
             <!-- Network Tools Card -->
             <Border Style="{StaticResource ModernCard}" Margin="0,0,0,20">
                 <Grid>
