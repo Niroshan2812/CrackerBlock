@@ -22,6 +22,8 @@ namespace AppBlocker.Core.IPC
             public const string FlushDns = "FlushDns";
             public const string SetTaskManagerState = "SetTaskManagerState";
             public const string GetTaskManagerState = "GetTaskManagerState";
+            public const string SetBrowserHardeningState = "SetBrowserHardeningState";
+            public const string GetBrowserHardeningState = "GetBrowserHardeningState";
         }
     }
 }

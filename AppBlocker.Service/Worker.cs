@@ -21,6 +21,7 @@ namespace AppBlocker.Service
         private readonly WebFilteringEngine _webFilteringEngine;
         private readonly HttpsProxyFilteringEngine _httpsProxyEngine;
         private readonly TaskManagerLockdownService _taskManagerLockdownService;
+        private readonly BrowserHardeningService _browserHardeningService;
         private NamedPipeIpcServer? _ipcServer;
         private readonly DateTime _serviceStartTime = DateTime.UtcNow;
         private volatile bool _isBlockingPaused = false;
@@ -38,6 +39,7 @@ namespace AppBlocker.Service
                 _logger.LogInformation("Web filter intercepted: {Host} -> {Redirect}", host, redirect ?? "BLOCKED");
             };
             _taskManagerLockdownService = new TaskManagerLockdownService(TaskManagerLockdownService.DefaultPolicySubKey, msg => _logger.LogInformation("{Message}", msg));
+            _browserHardeningService = new BrowserHardeningService(msg => _logger.LogInformation("{Message}", msg));
         }
 
         public override async Task StartAsync(CancellationToken cancellationToken)
@@ -66,6 +68,16 @@ namespace AppBlocker.Service
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Failed to start HTTPS proxy filtering engine.");
+            }
+
+            // Apply Browser Anti-Bypass Hardening (Disable Incognito & DoH leaks)
+            try
+            {
+                _browserHardeningService.ApplyHardening(disableIncognito: true, disableDnsOverHttps: true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to apply initial browser hardening policies.");
             }
 
             // Initialize IPC Server
@@ -199,6 +211,16 @@ namespace AppBlocker.Service
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Failed to restore Task Manager policy during shutdown.");
+            }
+
+            // Restore Browser default policies on service shutdown
+            try
+            {
+                _browserHardeningService.RestoreDefaults();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to restore browser default policies during shutdown.");
             }
 
             try
@@ -545,6 +567,23 @@ namespace AppBlocker.Service
                 {
                     var isBlocked = _taskManagerLockdownService.IsTaskMgrDisabled();
                     return IpcResponse.Ok(request.Id, "Task Manager state retrieved", new TaskManagerStateDto { IsDisabled = isBlocked });
+                }
+
+                case IpcConstants.Commands.SetBrowserHardeningState:
+                {
+                    var dto = request.GetPayload<BrowserHardeningDto>() ?? new BrowserHardeningDto();
+                    var success = _browserHardeningService.ApplyHardening(dto.DisableIncognito, dto.DisableDnsOverHttps);
+                    return IpcResponse.Ok(request.Id, $"Browser hardening updated: IncognitoDisabled={dto.DisableIncognito}, DoHDisabled={dto.DisableDnsOverHttps}", dto);
+                }
+
+                case IpcConstants.Commands.GetBrowserHardeningState:
+                {
+                    var (incognito, doh) = _browserHardeningService.GetCurrentStatus();
+                    return IpcResponse.Ok(request.Id, "Browser hardening state retrieved", new BrowserHardeningDto
+                    {
+                        DisableIncognito = incognito,
+                        DisableDnsOverHttps = doh
+                    });
                 }
 
                 default:

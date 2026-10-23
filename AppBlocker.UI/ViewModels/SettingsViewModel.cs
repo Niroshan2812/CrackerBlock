@@ -26,6 +26,12 @@ namespace AppBlocker.UI.ViewModels
         private bool _isTaskManagerDisabled;
 
         [ObservableProperty]
+        private bool _isIncognitoDisabled = true;
+
+        [ObservableProperty]
+        private bool _isDnsOverHttpsDisabled = true;
+
+        [ObservableProperty]
         private string _currentPinInput = string.Empty;
 
         [ObservableProperty]
@@ -71,6 +77,10 @@ namespace AppBlocker.UI.ViewModels
                     }
 
                     IsTaskManagerDisabled = await _ipcClient.IsTaskManagerDisabledAsync();
+
+                    var browserState = await _ipcClient.GetBrowserHardeningStateAsync();
+                    IsIncognitoDisabled = browserState.DisableIncognito;
+                    IsDnsOverHttpsDisabled = browserState.DisableDnsOverHttps;
                 }
                 else
                 {
@@ -107,6 +117,24 @@ namespace AppBlocker.UI.ViewModels
             var resp = await _ipcClient.SetTaskManagerStateAsync(newState);
             GeneralStatusMessage = resp.Message ?? "Task Manager policy updated.";
             IsTaskManagerDisabled = newState;
+        }
+
+        [RelayCommand]
+        private async Task ToggleIncognitoAsync()
+        {
+            var newState = !IsIncognitoDisabled;
+            var resp = await _ipcClient.SetBrowserHardeningStateAsync(newState, IsDnsOverHttpsDisabled);
+            IsIncognitoDisabled = newState;
+            GeneralStatusMessage = resp.Message ?? $"Incognito / InPrivate browsing {(newState ? "disabled" : "enabled")}.";
+        }
+
+        [RelayCommand]
+        private async Task ToggleDnsOverHttpsAsync()
+        {
+            var newState = !IsDnsOverHttpsDisabled;
+            var resp = await _ipcClient.SetBrowserHardeningStateAsync(IsIncognitoDisabled, newState);
+            IsDnsOverHttpsDisabled = newState;
+            GeneralStatusMessage = resp.Message ?? $"DNS-over-HTTPS leak protection {(newState ? "enforced" : "disabled")}.";
         }
 
         [RelayCommand]

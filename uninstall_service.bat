@@ -28,6 +28,14 @@ powershell -Command "Get-ChildItem Cert:\LocalMachine\Root, Cert:\CurrentUser\Ro
 echo [5/5] Restoring Policies & Flushing DNS...
 reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\System" /v DisableTaskMgr /f >nul 2>&1
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System" /v DisableTaskMgr /f >nul 2>&1
+reg delete "HKLM\Software\Policies\Google\Chrome" /v IncognitoModeAvailability /f >nul 2>&1
+reg delete "HKLM\Software\Policies\Google\Chrome" /v DnsOverHttpsMode /f >nul 2>&1
+reg delete "HKLM\Software\Policies\Google\Chrome" /v BuiltInDnsClientEnabled /f >nul 2>&1
+reg delete "HKLM\Software\Policies\Google\Chrome" /v ProxyMode /f >nul 2>&1
+reg delete "HKLM\Software\Policies\Microsoft\Edge" /v InPrivateModeAvailability /f >nul 2>&1
+reg delete "HKLM\Software\Policies\Microsoft\Edge" /v DnsOverHttpsMode /f >nul 2>&1
+reg delete "HKLM\Software\Policies\Microsoft\Edge" /v BuiltInDnsClientEnabled /f >nul 2>&1
+reg delete "HKLM\Software\Policies\Microsoft\Edge" /v ProxyMode /f >nul 2>&1
 ipconfig /flushdns >nul
 
 echo.

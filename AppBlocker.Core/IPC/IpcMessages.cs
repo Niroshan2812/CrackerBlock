@@ -101,4 +101,10 @@ namespace AppBlocker.Core.IPC
     {
         public bool IsDisabled { get; set; }
     }
+
+    public class BrowserHardeningDto
+    {
+        public bool DisableIncognito { get; set; } = true;
+        public bool DisableDnsOverHttps { get; set; } = true;
+    }
 }

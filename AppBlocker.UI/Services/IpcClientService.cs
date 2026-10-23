@@ -106,5 +106,25 @@ namespace AppBlocker.UI.Services
             }
             return false;
         }
+
+        public async Task<IpcResponse> SetBrowserHardeningStateAsync(bool disableIncognito, bool disableDnsOverHttps)
+        {
+            var dto = new BrowserHardeningDto
+            {
+                DisableIncognito = disableIncognito,
+                DisableDnsOverHttps = disableDnsOverHttps
+            };
+            return await _client.SendCommandAsync(IpcConstants.Commands.SetBrowserHardeningState, dto);
+        }
+
+        public async Task<BrowserHardeningDto> GetBrowserHardeningStateAsync()
+        {
+            var response = await _client.SendCommandAsync(IpcConstants.Commands.GetBrowserHardeningState);
+            if (response.Success && !string.IsNullOrEmpty(response.Payload))
+            {
+                return response.GetPayload<BrowserHardeningDto>() ?? new BrowserHardeningDto();
+            }
+            return new BrowserHardeningDto { DisableIncognito = false, DisableDnsOverHttps = false };
+        }
     }
 }
