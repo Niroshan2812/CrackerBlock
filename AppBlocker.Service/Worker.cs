@@ -39,9 +39,23 @@ namespace AppBlocker.Service
             _appLockingEngine = new AppLockingEngine(msg => _logger.LogInformation("{Message}", msg));
             _webFilteringEngine = new WebFilteringEngine(null, msg => _logger.LogInformation("{Message}", msg));
             _httpsProxyEngine = new HttpsProxyFilteringEngine(18888, msg => _logger.LogInformation("{Message}", msg));
-            _httpsProxyEngine.WebAccessIntercepted += (host, redirect) =>
+            _httpsProxyEngine.WebAccessIntercepted += async (host, redirect) =>
             {
                 _logger.LogInformation("Web filter intercepted: {Host} -> {Redirect}", host, redirect ?? "BLOCKED");
+                try
+                {
+                    await using var db = AppBlockerDbContext.CreateContext();
+                    db.Logs.Add(new SystemLog
+                    {
+                        Timestamp = DateTime.UtcNow,
+                        EventType = "Blocked Web",
+                        Description = string.IsNullOrWhiteSpace(redirect)
+                            ? $"Restricted access to domain: '{host}'"
+                            : $"Intercepted '{host}' -> Redirected to: '{redirect}'"
+                    });
+                    await db.SaveChangesAsync();
+                }
+                catch { }
             };
             _taskManagerLockdownService = new TaskManagerLockdownService(TaskManagerLockdownService.DefaultPolicySubKey, msg => _logger.LogInformation("{Message}", msg));
             _browserHardeningService = new BrowserHardeningService(msg => _logger.LogInformation("{Message}", msg));

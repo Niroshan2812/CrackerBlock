@@ -157,8 +157,8 @@
                                             <ControlTemplate TargetType="RadioButton">
                                                 <Border x:Name="btnBorder" Background="Transparent" CornerRadius="8" Padding="14,10" Cursor="Hand">
                                                     <StackPanel Orientation="Horizontal">
-                                                        <TextBlock Text="📋  " FontSize="15" />
-                                                        <TextBlock Text="Audit Logs" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" x:Name="txtLabel" />
+                                                        <TextBlock Text="📊  " FontSize="15" />
+                                                        <TextBlock Text="Analytics &amp; Logs" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" x:Name="txtLabel" />
                                                     </StackPanel>
                                                 </Border>
                                                 <ControlTemplate.Triggers>
