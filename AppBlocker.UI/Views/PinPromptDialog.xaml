@@ -1,0 +1,79 @@
+<Window x:Class="AppBlocker.UI.Views.PinPromptDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Master PIN Verification"
+        Height="310" Width="430"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        AllowsTransparency="True"
+        Background="Transparent">
+
+    <Border Background="{StaticResource BgMainBrush}"
+            BorderBrush="{StaticResource AccentPurpleBrush}"
+            BorderThickness="1.5"
+            CornerRadius="14"
+            Padding="26">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="25" Color="#000000" Opacity="0.75" ShadowDepth="6" />
+        </Border.Effect>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
+                <Border Width="36" Height="36" CornerRadius="8" Background="#261E40" BorderBrush="{StaticResource AccentPurpleBrush}" BorderThickness="1" Margin="0,0,10,0">
+                    <TextBlock Text="🔒" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <TextBlock Text="Master PIN Verification" FontSize="17" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
+            </StackPanel>
+
+            <!-- Description -->
+            <TextBlock x:Name="TxtPrompt" Grid.Row="1"
+                       Text="Enter your Master PIN to authorize this action."
+                       TextWrapping="Wrap"
+                       TextAlignment="Center"
+                       FontSize="13"
+                       Foreground="{StaticResource TextSecondaryBrush}"
+                       Margin="0,0,0,16" />
+
+            <!-- PIN Input -->
+            <PasswordBox x:Name="PbPin" Grid.Row="2"
+                         Style="{StaticResource ModernPasswordBox}"
+                         Height="42"
+                         FontSize="18"
+                         HorizontalContentAlignment="Center"
+                         KeyDown="PbPin_KeyDown" />
+
+            <!-- Error message -->
+            <TextBlock x:Name="TxtError" Grid.Row="3"
+                       Text="Incorrect PIN. Please try again."
+                       Foreground="{StaticResource DangerBrush}"
+                       FontSize="12"
+                       FontWeight="SemiBold"
+                       HorizontalAlignment="Center"
+                       Margin="0,8,0,0"
+                       Visibility="Collapsed" />
+
+            <!-- Action Buttons -->
+            <Grid Grid.Row="5" Margin="0,16,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="12" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="0" Content="Cancel" Style="{StaticResource ModernSecondaryButton}" Height="38" Click="CancelButton_Click" />
+                <Button Grid.Column="2" Content="Confirm" Style="{StaticResource ModernPrimaryButton}" Height="38" Click="ConfirmButton_Click" />
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

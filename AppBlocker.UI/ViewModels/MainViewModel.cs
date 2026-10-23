@@ -24,7 +24,13 @@ namespace AppBlocker.UI.ViewModels
         private bool _isServiceConnected;
 
         [ObservableProperty]
+        private bool _isBlockingPaused;
+
+        [ObservableProperty]
         private string _serviceStatusBadge = "Connecting to Service...";
+
+        public IPinSecurityService PinService => _pinService;
+        public IpcClientService IpcClient => _ipcClient;
 
         public LockScreenViewModel LockScreenVM { get; }
         public AppsViewModel AppsVM { get; }
@@ -120,18 +126,54 @@ namespace AppBlocker.UI.ViewModels
             _ = LockScreenVM.InitializeAsync();
         }
 
+        public async Task<bool> PauseBlockingAsync(int minutes)
+        {
+            try
+            {
+                var resp = await _ipcClient.PauseBlockingAsync(minutes);
+                if (resp.Success)
+                {
+                    IsBlockingPaused = true;
+                    await CheckServiceStatusAsync();
+                    return true;
+                }
+            }
+            catch { }
+            return false;
+        }
+
+        public async Task<bool> ResumeBlockingAsync()
+        {
+            try
+            {
+                var resp = await _ipcClient.ResumeBlockingAsync();
+                if (resp.Success)
+                {
+                    IsBlockingPaused = false;
+                    await CheckServiceStatusAsync();
+                    return true;
+                }
+            }
+            catch { }
+            return false;
+        }
+
         private async Task CheckServiceStatusAsync()
         {
             try
             {
-                var connected = await _ipcClient.IsServiceAvailableAsync();
-                IsServiceConnected = connected;
-                if (connected)
+                var status = await _ipcClient.GetStatusAsync();
+                if (status != null)
                 {
-                    ServiceStatusBadge = "Background Daemon Active (LocalSystem)";
+                    IsServiceConnected = true;
+                    IsBlockingPaused = status.IsBlockingPaused;
+                    ServiceStatusBadge = IsBlockingPaused 
+                        ? "Protection Paused (Background Daemon Active)" 
+                        : "Background Daemon Active (LocalSystem)";
                 }
                 else
                 {
+                    IsServiceConnected = false;
                     ServiceStatusBadge = "Daemon Offline (Start AppBlocker.Service)";
                 }
             }
