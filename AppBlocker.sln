@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppBlocker.Service", "AppBl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppBlocker.Tests", "AppBlocker.Tests\AppBlocker.Tests.csproj", "{352B20EC-B636-4117-A14C-D1FD931D32D0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppBlocker.Watchdog", "AppBlocker.Watchdog\AppBlocker.Watchdog.csproj", "{F7059D05-1262-418C-8939-966F32631FEC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{352B20EC-B636-4117-A14C-D1FD931D32D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{352B20EC-B636-4117-A14C-D1FD931D32D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{352B20EC-B636-4117-A14C-D1FD931D32D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7059D05-1262-418C-8939-966F32631FEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7059D05-1262-418C-8939-966F32631FEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7059D05-1262-418C-8939-966F32631FEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7059D05-1262-418C-8939-966F32631FEC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

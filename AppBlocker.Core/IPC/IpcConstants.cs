@@ -24,6 +24,7 @@ namespace AppBlocker.Core.IPC
             public const string GetTaskManagerState = "GetTaskManagerState";
             public const string SetBrowserHardeningState = "SetBrowserHardeningState";
             public const string GetBrowserHardeningState = "GetBrowserHardeningState";
+            public const string GetWatchdogStatus = "GetWatchdogStatus";
         }
     }
 }

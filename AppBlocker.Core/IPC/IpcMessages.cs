@@ -107,4 +107,11 @@ namespace AppBlocker.Core.IPC
         public bool DisableIncognito { get; set; } = true;
         public bool DisableDnsOverHttps { get; set; } = true;
     }
+
+    public class WatchdogStatusDto
+    {
+        public bool IsWatchdogActive { get; set; }
+        public int WatchdogPid { get; set; }
+        public bool IsCleanShutdownSignaled { get; set; }
+    }
 }

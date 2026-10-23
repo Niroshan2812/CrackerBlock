@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -22,6 +23,9 @@ namespace AppBlocker.Service
         private readonly HttpsProxyFilteringEngine _httpsProxyEngine;
         private readonly TaskManagerLockdownService _taskManagerLockdownService;
         private readonly BrowserHardeningService _browserHardeningService;
+        private readonly WatchdogCoordinator _watchdogCoordinator;
+        private Process? _watchdogProcess;
+        private DateTime _lastWatchdogCheck = DateTime.MinValue;
         private NamedPipeIpcServer? _ipcServer;
         private readonly DateTime _serviceStartTime = DateTime.UtcNow;
         private volatile bool _isBlockingPaused = false;
@@ -40,6 +44,7 @@ namespace AppBlocker.Service
             };
             _taskManagerLockdownService = new TaskManagerLockdownService(TaskManagerLockdownService.DefaultPolicySubKey, msg => _logger.LogInformation("{Message}", msg));
             _browserHardeningService = new BrowserHardeningService(msg => _logger.LogInformation("{Message}", msg));
+            _watchdogCoordinator = new WatchdogCoordinator(msg => _logger.LogInformation("{Message}", msg));
         }
 
         public override async Task StartAsync(CancellationToken cancellationToken)
@@ -106,6 +111,17 @@ namespace AppBlocker.Service
                 _logger.LogWarning(ex, "Failed to write service start log to database.");
             }
 
+            // Milestone 4: Layer 4 Dual-Process Mutual Watchdog companion launch
+            try
+            {
+                WatchdogCoordinator.ResetCleanShutdown();
+                _watchdogProcess = _watchdogCoordinator.LaunchWatchdog(Environment.ProcessId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to launch companion watchdog during service startup.");
+            }
+
             await base.StartAsync(cancellationToken);
         }
 
@@ -169,6 +185,41 @@ namespace AppBlocker.Service
                     }
                 }
 
+                // Milestone 4: Mutual Watchdog Health Check every 1 second
+                if (!stoppingToken.IsCancellationRequested && DateTime.UtcNow - _lastWatchdogCheck >= TimeSpan.FromSeconds(1))
+                {
+                    _lastWatchdogCheck = DateTime.UtcNow;
+                    bool watchdogAlive = false;
+                    if (_watchdogProcess != null)
+                    {
+                        try
+                        {
+                            watchdogAlive = !_watchdogProcess.HasExited;
+                        }
+                        catch
+                        {
+                            watchdogAlive = false;
+                        }
+                    }
+                    else
+                    {
+                        watchdogAlive = WatchdogCoordinator.IsWatchdogProcessRunning();
+                    }
+
+                    if (!watchdogAlive)
+                    {
+                        _logger.LogWarning("Companion Watchdog process was terminated! Reviving Watchdog immediately...");
+                        try
+                        {
+                            _watchdogProcess = _watchdogCoordinator.LaunchWatchdog(Environment.ProcessId);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning(ex, "Failed to revive companion watchdog.");
+                        }
+                    }
+                }
+
                 await Task.Delay(1500, stoppingToken);
             }
         }
@@ -176,6 +227,22 @@ namespace AppBlocker.Service
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("AppBlocker Service stopping...");
+
+            // Milestone 4: Signal clean shutdown so watchdog does not attempt to revive
+            try
+            {
+                _logger.LogInformation("Signaling clean shutdown event to companion watchdog...");
+                WatchdogCoordinator.SignalCleanShutdown();
+                if (_watchdogProcess != null && !_watchdogProcess.HasExited)
+                {
+                    _watchdogProcess.WaitForExit(1500);
+                }
+                WatchdogCoordinator.TerminateAllWatchdogs();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Error while stopping companion watchdog during clean shutdown.");
+            }
 
             if (_ipcServer != null)
             {
@@ -584,6 +651,38 @@ namespace AppBlocker.Service
                         DisableIncognito = incognito,
                         DisableDnsOverHttps = doh
                     });
+                }
+
+                case IpcConstants.Commands.GetWatchdogStatus:
+                {
+                    bool isAlive = false;
+                    int pid = 0;
+                    if (_watchdogProcess != null)
+                    {
+                        try
+                        {
+                            isAlive = !_watchdogProcess.HasExited;
+                            if (isAlive) pid = _watchdogProcess.Id;
+                        }
+                        catch { }
+                    }
+                    if (!isAlive)
+                    {
+                        var watchdogs = Process.GetProcessesByName(WatchdogCoordinator.WatchdogProcessName);
+                        if (watchdogs.Length > 0)
+                        {
+                            isAlive = true;
+                            pid = watchdogs[0].Id;
+                        }
+                    }
+
+                    var dto = new WatchdogStatusDto
+                    {
+                        IsWatchdogActive = isAlive,
+                        WatchdogPid = pid,
+                        IsCleanShutdownSignaled = WatchdogCoordinator.IsCleanShutdownSignaled()
+                    };
+                    return IpcResponse.Ok(request.Id, "Watchdog status retrieved", dto);
                 }
 
                 default:

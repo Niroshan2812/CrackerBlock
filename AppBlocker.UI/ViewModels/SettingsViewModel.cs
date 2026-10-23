@@ -32,6 +32,12 @@ namespace AppBlocker.UI.ViewModels
         private bool _isDnsOverHttpsDisabled = true;
 
         [ObservableProperty]
+        private bool _isWatchdogActive = true;
+
+        [ObservableProperty]
+        private string _watchdogStatusText = "Dual-Process Guard Active (Immune to taskkill)";
+
+        [ObservableProperty]
         private string _currentPinInput = string.Empty;
 
         [ObservableProperty]
@@ -81,10 +87,18 @@ namespace AppBlocker.UI.ViewModels
                     var browserState = await _ipcClient.GetBrowserHardeningStateAsync();
                     IsIncognitoDisabled = browserState.DisableIncognito;
                     IsDnsOverHttpsDisabled = browserState.DisableDnsOverHttps;
+
+                    var watchdogState = await _ipcClient.GetWatchdogStatusAsync();
+                    IsWatchdogActive = watchdogState.IsWatchdogActive;
+                    WatchdogStatusText = watchdogState.IsWatchdogActive
+                        ? $"Armed & Active (PID: {watchdogState.WatchdogPid}) - 500ms mutual recovery enabled"
+                        : "Inactive - Will automatically launch when background service is active";
                 }
                 else
                 {
                     ServiceStatusText = "Service Offline / Connecting...";
+                    IsWatchdogActive = false;
+                    WatchdogStatusText = "Service Offline";
                 }
             }
             catch (Exception ex)

@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AppBlocker.Core\AppBlocker.Core.csproj" />
     <ProjectReference Include="..\AppBlocker.UI\AppBlocker.UI.csproj" />
+    <ProjectReference Include="..\AppBlocker.Watchdog\AppBlocker.Watchdog.csproj" />
   </ItemGroup>
 
 </Project>

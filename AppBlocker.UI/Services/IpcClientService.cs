@@ -126,5 +126,15 @@ namespace AppBlocker.UI.Services
             }
             return new BrowserHardeningDto { DisableIncognito = false, DisableDnsOverHttps = false };
         }
+
+        public async Task<WatchdogStatusDto> GetWatchdogStatusAsync()
+        {
+            var response = await _client.SendCommandAsync(IpcConstants.Commands.GetWatchdogStatus);
+            if (response.Success && !string.IsNullOrEmpty(response.Payload))
+            {
+                return response.GetPayload<WatchdogStatusDto>() ?? new WatchdogStatusDto();
+            }
+            return new WatchdogStatusDto { IsWatchdogActive = false };
+        }
     }
 }

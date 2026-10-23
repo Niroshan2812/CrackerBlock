@@ -11,6 +11,13 @@ if %errorLevel% neq 0 (
 set SERVICE_NAME=AppBlockerService
 set SERVICE_EXE=%~dp0AppBlocker.Service\bin\Debug\net9.0\AppBlocker.Service.exe
 
+:: Stop running watchdog companion and UI if present so dotnet build can overwrite binaries
+if exist "%~dp0AppBlocker.Watchdog\bin\Debug\net9.0\AppBlocker.Watchdog.exe" (
+    "%~dp0AppBlocker.Watchdog\bin\Debug\net9.0\AppBlocker.Watchdog.exe" --signal-shutdown >nul 2>&1
+)
+taskkill /F /IM AppBlocker.Watchdog.exe >nul 2>&1
+taskkill /F /IM AppBlocker.UI.exe >nul 2>&1
+
 :: Stop running service if present so dotnet build can overwrite binaries
 sc.exe query "%SERVICE_NAME%" 2>&1 | find /I "RUNNING" >nul
 if %errorLevel% equ 0 (
@@ -19,13 +26,16 @@ if %errorLevel% equ 0 (
     timeout /t 3 /nobreak >nul
 )
 
-echo [INFO] Building latest AppBlocker solution...
+echo [INFO] Building latest AppBlocker solution (Core, Service, Watchdog, UI)...
 dotnet build "%~dp0AppBlocker.sln" -c Debug
 if %errorLevel% neq 0 (
     echo [ERROR] Build failed! Please review compilation errors above.
     pause
     exit /b 1
 )
+
+:: Ensure Watchdog binary exists alongside Service binary
+copy /Y "%~dp0AppBlocker.Watchdog\bin\Debug\net9.0\AppBlocker.Watchdog.*" "%~dp0AppBlocker.Service\bin\Debug\net9.0\" >nul 2>&1
 
 echo [1/3] Registering Windows Service: %SERVICE_NAME%...
 sc.exe query "%SERVICE_NAME%" >nul 2>&1
