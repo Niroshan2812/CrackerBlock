@@ -22,6 +22,7 @@ namespace AppBlocker.Core.Enforcement
 
         public bool IsPaused { get; set; } = false;
         public bool IsFocusModeActive { get; set; } = false;
+        public SafeChildModeService? SafeChildMode { get; set; }
         public event Action<string, int, string>? ProcessTerminated;
 
         public AppLockingEngine(Action<string>? logger = null)
@@ -161,6 +162,27 @@ namespace AppBlocker.Core.Enforcement
                     if (IsTemporarilyUnlocked(procName))
                     {
                         continue;
+                    }
+
+                    // 2b. Check Safe Child Shield restriction (e.g. addictive games like Roblox, Steam, Valorant, Minecraft)
+                    if (SafeChildMode != null && SafeChildMode.IsProcessRestricted(procName, out var childReason))
+                    {
+                        var pid = process.Id;
+                        try
+                        {
+                            process.Kill();
+                            process.WaitForExit(1000);
+                            terminatedCount++;
+
+                            _logger?.Invoke($"[SAFE CHILD] Terminated restricted game: '{procName}' (PID: {pid}). Reason: {childReason}");
+                            ProcessTerminated?.Invoke(procName, pid, "Safe Child Shield");
+                            await LogTerminationAsync(procName, pid, "Safe Child Shield");
+                            continue;
+                        }
+                        catch (Exception killEx)
+                        {
+                            _logger?.Invoke($"Failed to terminate child-restricted process '{procName}' (PID: {pid}): {killEx.Message}");
+                        }
                     }
 
                     // 3. Match against active rules

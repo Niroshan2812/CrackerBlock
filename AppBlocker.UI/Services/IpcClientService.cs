@@ -187,5 +187,20 @@ namespace AppBlocker.UI.Services
         {
             return await _client.SendCommandAsync(IpcConstants.Commands.ToggleCustomSchedule, new { Id = id });
         }
+
+        public async Task<IpcResponse> SetSafeChildModeStateAsync(SafeChildModeDto dto)
+        {
+            return await _client.SendCommandAsync(IpcConstants.Commands.SetSafeChildModeState, dto);
+        }
+
+        public async Task<SafeChildModeDto> GetSafeChildModeStateAsync()
+        {
+            var response = await _client.SendCommandAsync(IpcConstants.Commands.GetSafeChildModeState);
+            if (response.Success && !string.IsNullOrEmpty(response.Payload))
+            {
+                return response.GetPayload<SafeChildModeDto>() ?? new SafeChildModeDto();
+            }
+            return new SafeChildModeDto();
+        }
     }
 }

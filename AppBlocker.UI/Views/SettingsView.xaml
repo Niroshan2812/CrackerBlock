@@ -20,6 +20,144 @@
                 <TextBlock Text="{Binding GeneralStatusMessage}" Foreground="{StaticResource SuccessBrush}" FontSize="13" />
             </Border>
 
+            <!-- Safe Child Mode (Parental Shield) Card -->
+            <Border Margin="0,0,0,20" CornerRadius="12" Padding="20">
+                <Border.Style>
+                    <Style TargetType="Border" BasedOn="{StaticResource ModernCard}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsSafeChildModeEnabled}" Value="True">
+                                <Setter Property="BorderBrush" Value="{StaticResource AccentPurpleBrush}" />
+                                <Setter Property="Background" Value="#17162B" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+
+                <StackPanel>
+                    <!-- Header with Master Toggle -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                <TextBlock Text="👶🛡️ " FontSize="18" VerticalAlignment="Center" />
+                                <TextBlock Text="Safe Child Mode (Parental Protection Shield)" FontSize="17" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Text="{Binding SafeChildStatusText}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" />
+                        </StackPanel>
+
+                        <!-- Master Switch Button -->
+                        <Button Grid.Column="1"
+                                Command="{Binding ToggleSafeChildModeCommand}"
+                                VerticalAlignment="Center"
+                                Height="42" Padding="18,8">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource ModernPrimaryButton}">
+                                    <Setter Property="Content" Value="👶 Enable Child Shield" />
+                                    <Setter Property="Background" Value="{StaticResource AccentPurpleBrush}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsSafeChildModeEnabled}" Value="True">
+                                            <Setter Property="Content" Value="🛡️ SHIELD ACTIVE (Click to Unlock)" />
+                                            <Setter Property="Background" Value="{StaticResource SuccessBrush}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </Grid>
+
+                    <!-- Sub-Category Protections -->
+                    <StackPanel>
+                        <!-- 1. Adult & Explicit Content / Gambling -->
+                        <Border Background="{StaticResource BgSidebarBrush}" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="🔞 Block Adult Websites &amp; Online Gambling" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <TextBlock Text="Restricts adult entertainment sites, NSFW forums, sexually explicit content, and gambling/betting platforms." FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
+                                </StackPanel>
+
+                                <CheckBox Grid.Column="1"
+                                          IsChecked="{Binding SafeChildBlockAdultSites}"
+                                          Command="{Binding SaveSafeChildSettingsCommand}"
+                                          VerticalAlignment="Center"
+                                          Cursor="Hand" />
+                            </Grid>
+                        </Border>
+
+                        <!-- 2. Social Media Restriction -->
+                        <Border Background="{StaticResource BgSidebarBrush}" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="📱 Restrict Social Media Browsing" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <TextBlock Text="Blocks distracting social feeds including TikTok, Instagram, Facebook, Snapchat, Reddit, and Twitter/X." FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
+                                </StackPanel>
+
+                                <CheckBox Grid.Column="1"
+                                          IsChecked="{Binding SafeChildBlockSocialMedia}"
+                                          Command="{Binding SaveSafeChildSettingsCommand}"
+                                          VerticalAlignment="Center"
+                                          Cursor="Hand" />
+                            </Grid>
+                        </Border>
+
+                        <!-- 3. Addictive Gaming Launchers & Web Games -->
+                        <Border Background="{StaticResource BgSidebarBrush}" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="🎮 Block Addictive Games &amp; Launchers" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <TextBlock Text="Automatically terminates Roblox, Steam, Epic Games, Valorant, Riot Client, Minecraft, and blocks web games (Poki, CrazyGames)." FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
+                                </StackPanel>
+
+                                <CheckBox Grid.Column="1"
+                                          IsChecked="{Binding SafeChildBlockGaming}"
+                                          Command="{Binding SaveSafeChildSettingsCommand}"
+                                          VerticalAlignment="Center"
+                                          Cursor="Hand" />
+                            </Grid>
+                        </Border>
+
+                        <!-- 4. SafeSearch Enforcement -->
+                        <Border Background="{StaticResource BgSidebarBrush}" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" CornerRadius="8" Padding="14">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="🔍 Enforce Strict Search Engine SafeSearch" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <TextBlock Text="Forces family-safe strict filtering on Google, Bing, YouTube, and DuckDuckGo search queries." FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
+                                </StackPanel>
+
+                                <CheckBox Grid.Column="1"
+                                          IsChecked="{Binding SafeChildEnforceSafeSearch}"
+                                          Command="{Binding SaveSafeChildSettingsCommand}"
+                                          VerticalAlignment="Center"
+                                          Cursor="Hand" />
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
             <!-- Background Daemon Status Card -->
             <Border Style="{StaticResource ModernCard}" Margin="0,0,0,20">
                 <StackPanel>

@@ -25,6 +25,7 @@ namespace AppBlocker.Service
         private readonly BrowserHardeningService _browserHardeningService;
         private readonly WatchdogCoordinator _watchdogCoordinator;
         private readonly FocusSessionService _focusSessionService;
+        private readonly SafeChildModeService _safeChildModeService;
         private Process? _watchdogProcess;
         private DateTime _lastWatchdogCheck = DateTime.MinValue;
         private NamedPipeIpcServer? _ipcServer;
@@ -63,6 +64,10 @@ namespace AppBlocker.Service
             _focusSessionService = new FocusSessionService(msg => _logger.LogInformation("{Message}", msg));
             _focusSessionService.SessionStarted += name => SyncFocusState();
             _focusSessionService.SessionCompleted += name => SyncFocusState();
+
+            _safeChildModeService = new SafeChildModeService(null, msg => _logger.LogInformation("{Message}", msg));
+            _appLockingEngine.SafeChildMode = _safeChildModeService;
+            _httpsProxyEngine.SafeChildMode = _safeChildModeService;
         }
 
         private void SyncFocusState()
@@ -916,6 +921,54 @@ namespace AppBlocker.Service
                         return IpcResponse.Ok(request.Id, $"Schedule '{target.Name}' active state: {target.IsActive}", new { IsActive = target.IsActive });
                     }
                     return IpcResponse.Error(request.Id, "Schedule not found.");
+                }
+
+                case IpcConstants.Commands.SetSafeChildModeState:
+                {
+                    var dto = request.GetPayload<SafeChildModeDto>();
+                    if (dto != null)
+                    {
+                        var settings = new SafeChildSettings
+                        {
+                            IsEnabled = dto.IsEnabled,
+                            BlockAdultSites = dto.BlockAdultSites,
+                            BlockSocialMedia = dto.BlockSocialMedia,
+                            BlockGaming = dto.BlockGaming,
+                            EnforceSafeSearch = dto.EnforceSafeSearch
+                        };
+                        _safeChildModeService.SaveSettings(settings);
+
+                        try
+                        {
+                            await using var db = AppBlockerDbContext.CreateContext();
+                            db.Logs.Add(new SystemLog
+                            {
+                                Timestamp = DateTime.UtcNow,
+                                EventType = dto.IsEnabled ? "Safe Child Enabled" : "Safe Child Disabled",
+                                Description = dto.IsEnabled
+                                    ? "Safe Child Shield activated (Adult, Social Media, Gaming restrictions engaged)."
+                                    : "Safe Child Shield deactivated by administrator."
+                            });
+                            await db.SaveChangesAsync();
+                        }
+                        catch { }
+
+                        return IpcResponse.Ok(request.Id, $"Safe Child Mode updated. Active: {dto.IsEnabled}", dto);
+                    }
+                    return IpcResponse.Error(request.Id, "Invalid SafeChildMode payload.");
+                }
+
+                case IpcConstants.Commands.GetSafeChildModeState:
+                {
+                    var dto = new SafeChildModeDto
+                    {
+                        IsEnabled = _safeChildModeService.IsEnabled,
+                        BlockAdultSites = _safeChildModeService.BlockAdultSites,
+                        BlockSocialMedia = _safeChildModeService.BlockSocialMedia,
+                        BlockGaming = _safeChildModeService.BlockGaming,
+                        EnforceSafeSearch = _safeChildModeService.EnforceSafeSearch
+                    };
+                    return IpcResponse.Ok(request.Id, "Safe Child Mode state retrieved.", dto);
                 }
 
                 default:

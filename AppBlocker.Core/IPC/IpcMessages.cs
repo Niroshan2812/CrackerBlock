@@ -142,4 +142,13 @@ namespace AppBlocker.Core.IPC
         public bool IsActive { get; set; } = true;
         public bool IsActiveNow { get; set; }
     }
+
+    public class SafeChildModeDto
+    {
+        public bool IsEnabled { get; set; }
+        public bool BlockAdultSites { get; set; } = true;
+        public bool BlockSocialMedia { get; set; } = true;
+        public bool BlockGaming { get; set; } = true;
+        public bool EnforceSafeSearch { get; set; } = true;
+    }
 }

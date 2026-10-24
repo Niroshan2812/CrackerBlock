@@ -30,6 +30,7 @@ namespace AppBlocker.Core.Enforcement
 
         private bool _isPaused = false;
         public bool IsFocusModeActive { get; set; } = false;
+        public SafeChildModeService? SafeChildMode { get; set; }
         public bool IsPaused
         {
             get => _isPaused;
@@ -251,6 +252,57 @@ namespace AppBlocker.Core.Enforcement
 
                 var host = uri.Host;
                 var now = DateTime.Now;
+
+                // 0. Safe Child Shield Interception & SafeSearch Enforcement
+                if (SafeChildMode != null && SafeChildMode.IsEnabled)
+                {
+                    if (SafeChildMode.TryEnforceSafeSearch(uri, out var safeSearchUri) && !string.IsNullOrEmpty(safeSearchUri))
+                    {
+                        var safeHeaders = new Dictionary<string, HttpHeader>(StringComparer.OrdinalIgnoreCase)
+                        {
+                            ["Location"] = new HttpHeader("Location", safeSearchUri),
+                            ["Cache-Control"] = new HttpHeader("Cache-Control", "no-cache, no-store, must-revalidate")
+                        };
+                        e.GenericResponse("<!DOCTYPE html><html><body>Redirecting to SafeSearch...</body></html>", HttpStatusCode.Redirect, safeHeaders);
+                        return;
+                    }
+
+                    if (SafeChildMode.IsHostRestricted(host, out var childReason))
+                    {
+                        _logger?.Invoke($"[SAFE CHILD BLOCKED] {host} restricted: {childReason}");
+                        WebAccessIntercepted?.Invoke(host, null);
+
+                        var childBlockHtml = $@"<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""utf-8"">
+    <title>Safe Child Shield - Content Restricted</title>
+    <style>
+        body {{ background: #0F111A; color: #F8FAFC; font-family: Segoe UI, Roboto, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }}
+        .card {{ background: #1A1D2D; border: 1.5px solid #8B5CF6; border-radius: 16px; padding: 44px; text-align: center; max-width: 520px; box-shadow: 0 10px 40px rgba(139,92,246,0.25); }}
+        .icon {{ font-size: 54px; margin-bottom: 16px; }}
+        h1 {{ margin: 0 0 10px 0; font-size: 24px; color: #A78BFA; }}
+        p {{ color: #94A3B8; font-size: 14.5px; line-height: 1.6; margin: 0 0 24px 0; }}
+        .badge {{ background: #261E40; color: #06B6D4; padding: 8px 18px; border-radius: 20px; font-size: 13px; font-weight: bold; border: 1px solid #06B6D4; display: inline-block; }}
+    </style>
+</head>
+<body>
+    <div class=""card"">
+        <div class=""icon"">👶🛡️</div>
+        <h1>Safe Child Shield Active</h1>
+        <p>Access to <strong>{WebUtility.HtmlEncode(host)}</strong> has been blocked to protect you from <strong>{WebUtility.HtmlEncode(childReason)}</strong>.</p>
+        <div class=""badge"">CrackerBlock Parental Protection</div>
+    </div>
+</body>
+</html>";
+
+                        e.GenericResponse(childBlockHtml, HttpStatusCode.Forbidden, new Dictionary<string, HttpHeader>
+                        {
+                            ["Cache-Control"] = new HttpHeader("Cache-Control", "no-cache, no-store, must-revalidate")
+                        });
+                        return;
+                    }
+                }
 
                 WebRule? matchedRule = null;
                 lock (_rulesLock)

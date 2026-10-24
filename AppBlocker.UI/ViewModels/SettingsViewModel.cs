@@ -55,6 +55,25 @@ namespace AppBlocker.UI.ViewModels
         [ObservableProperty]
         private string _generalStatusMessage = string.Empty;
 
+        // Safe Child Mode (Parental Shield)
+        [ObservableProperty]
+        private bool _isSafeChildModeEnabled;
+
+        [ObservableProperty]
+        private bool _safeChildBlockAdultSites = true;
+
+        [ObservableProperty]
+        private bool _safeChildBlockSocialMedia = true;
+
+        [ObservableProperty]
+        private bool _safeChildBlockGaming = true;
+
+        [ObservableProperty]
+        private bool _safeChildEnforceSafeSearch = true;
+
+        [ObservableProperty]
+        private string _safeChildStatusText = "Shield disabled. Protection inactive.";
+
         // Desktop Notifications & Real-Time Alerts
         [ObservableProperty]
         private bool _isToastNotificationsEnabled = true;
@@ -124,6 +143,16 @@ namespace AppBlocker.UI.ViewModels
                     WatchdogStatusText = watchdogState.IsWatchdogActive
                         ? $"Armed & Active (PID: {watchdogState.WatchdogPid}) - 500ms mutual recovery enabled"
                         : "Inactive - Will automatically launch when background service is active";
+
+                    var childState = await _ipcClient.GetSafeChildModeStateAsync();
+                    IsSafeChildModeEnabled = childState.IsEnabled;
+                    SafeChildBlockAdultSites = childState.BlockAdultSites;
+                    SafeChildBlockSocialMedia = childState.BlockSocialMedia;
+                    SafeChildBlockGaming = childState.BlockGaming;
+                    SafeChildEnforceSafeSearch = childState.EnforceSafeSearch;
+                    SafeChildStatusText = IsSafeChildModeEnabled
+                        ? "Active & Protecting: Adult, Social Media & Gaming restricted."
+                        : "Shield disabled. Protection inactive.";
                 }
                 else
                 {
@@ -229,6 +258,43 @@ namespace AppBlocker.UI.ViewModels
         {
             NotificationService.Instance.ShowTestNotification(_testNotificationIndex++);
             GeneralStatusMessage = "🔔 Test alert sent! Check the bottom-right corner of your desktop.";
+        }
+
+        [RelayCommand]
+        private async Task ToggleSafeChildModeAsync()
+        {
+            if (IsSafeChildModeEnabled)
+            {
+                var promptDlg = new Views.PinPromptDialog(_pinService, "Enter Master PIN to disable Safe Child Protection Shield:");
+                if (promptDlg.ShowDialog() != true)
+                {
+                    return;
+                }
+            }
+
+            IsSafeChildModeEnabled = !IsSafeChildModeEnabled;
+            await SaveSafeChildSettingsAsync();
+        }
+
+        [RelayCommand]
+        private async Task SaveSafeChildSettingsAsync()
+        {
+            var dto = new Core.IPC.SafeChildModeDto
+            {
+                IsEnabled = IsSafeChildModeEnabled,
+                BlockAdultSites = SafeChildBlockAdultSites,
+                BlockSocialMedia = SafeChildBlockSocialMedia,
+                BlockGaming = SafeChildBlockGaming,
+                EnforceSafeSearch = SafeChildEnforceSafeSearch
+            };
+
+            await _ipcClient.SetSafeChildModeStateAsync(dto);
+            SafeChildStatusText = IsSafeChildModeEnabled
+                ? "Active & Protecting: Adult, Social Media & Gaming restricted."
+                : "Shield disabled. Protection inactive.";
+            GeneralStatusMessage = IsSafeChildModeEnabled
+                ? "👶 Safe Child Shield activated! Restrictions are now actively enforced."
+                : "Safe Child Shield disabled.";
         }
 
         private void SetPinStatus(string msg, bool success)
