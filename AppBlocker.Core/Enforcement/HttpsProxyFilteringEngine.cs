@@ -358,23 +358,61 @@ namespace AppBlocker.Core.Enforcement
             }
 
             var cleanRule = WebFilteringEngine.NormalizeDomain(ruleTarget);
-            var cleanHost = host.Trim().ToLowerInvariant();
+            var rawHost = host.Trim().ToLowerInvariant();
+            var cleanHost = WebFilteringEngine.NormalizeDomain(host);
+
+            if (string.IsNullOrEmpty(cleanRule) || string.IsNullOrEmpty(cleanHost))
+            {
+                return false;
+            }
 
             // 1. Direct match (e.g. "youtube.com" == "youtube.com")
-            if (string.Equals(cleanHost, cleanRule, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(cleanHost, cleanRule, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(rawHost, cleanRule, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
 
-            // 2. Subdomain match (e.g. "en.wikipedia.org" ends with ".wikipedia.org", "www.youtube.com" ends with ".youtube.com")
-            if (cleanHost.EndsWith("." + cleanRule, StringComparison.OrdinalIgnoreCase))
+            // 2. Keyword match: If rule contains no dots (e.g. "wikipedia", "reddit", "facebook")
+            if (!cleanRule.Contains('.'))
+            {
+                var hostSegments = rawHost.Split('.');
+                if (hostSegments.Any(s => string.Equals(s, cleanRule, StringComparison.OrdinalIgnoreCase)))
+                {
+                    return true;
+                }
+            }
+
+            // 3. Subdomain match (e.g. "en.wikipedia.org" ends with ".wikipedia.org", "www.youtube.com" ends with ".youtube.com")
+            if (rawHost.EndsWith("." + cleanRule, StringComparison.OrdinalIgnoreCase) ||
+                cleanHost.EndsWith("." + cleanRule, StringComparison.OrdinalIgnoreCase) ||
+                cleanRule.EndsWith("." + cleanHost, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
 
-            // 3. Cluster expansion match (e.g. "googlevideo.com" or "ytimg.com" for "youtube.com")
+            // 4. Cluster expansion match (e.g. "googlevideo.com" for "youtube.com", "wikimedia.org" for "wikipedia.org")
             var expanded = WebFilteringEngine.ExpandDomain(cleanRule);
-            if (expanded.Any(d => string.Equals(cleanHost, d, StringComparison.OrdinalIgnoreCase) || cleanHost.EndsWith("." + d, StringComparison.OrdinalIgnoreCase)))
+            if (expanded.Any(d =>
+            {
+                var cleanD = WebFilteringEngine.NormalizeDomain(d);
+                return string.Equals(cleanHost, cleanD, StringComparison.OrdinalIgnoreCase) ||
+                       string.Equals(rawHost, d, StringComparison.OrdinalIgnoreCase) ||
+                       rawHost.EndsWith("." + cleanD, StringComparison.OrdinalIgnoreCase) ||
+                       rawHost.EndsWith("." + d, StringComparison.OrdinalIgnoreCase);
+            }))
+            {
+                return true;
+            }
+
+            // 5. Cross-TLD / Core Second-Level Domain (SLD) Matching
+            // (e.g. "www.wikipidea.com" matches "www.wikipidea.org", "wikipedia.com" matches "wikipedia.org")
+            var (ruleSld, _) = WebFilteringEngine.ExtractDomainParts(cleanRule);
+            var (hostSld, _) = WebFilteringEngine.ExtractDomainParts(rawHost);
+
+            if (!string.IsNullOrEmpty(ruleSld) &&
+                ruleSld.Length >= 4 &&
+                string.Equals(ruleSld, hostSld, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }

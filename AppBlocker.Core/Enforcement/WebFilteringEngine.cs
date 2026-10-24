@@ -238,7 +238,43 @@ namespace AppBlocker.Core.Enforcement
                 clean = clean.Substring(0, colonIndex);
             }
 
-            return clean.Trim('.');
+            clean = clean.Trim('.');
+
+            // Strip leading "www." for canonical domain matching
+            if (clean.StartsWith("www.", StringComparison.OrdinalIgnoreCase) && clean.Length > 4)
+            {
+                clean = clean.Substring(4);
+            }
+
+            return clean;
+        }
+
+        public static (string sld, string tld) ExtractDomainParts(string domain)
+        {
+            if (string.IsNullOrWhiteSpace(domain))
+            {
+                return (string.Empty, string.Empty);
+            }
+
+            var clean = NormalizeDomain(domain);
+            var parts = clean.Split('.');
+            if (parts.Length <= 1)
+            {
+                return (clean, string.Empty);
+            }
+
+            // Handle multi-part TLDs (e.g. .co.uk, .com.au, .org.uk, .gov.uk, .edu.au)
+            if (parts.Length >= 3 && (parts[^2].Equals("co", StringComparison.OrdinalIgnoreCase) ||
+                                      parts[^2].Equals("com", StringComparison.OrdinalIgnoreCase) ||
+                                      parts[^2].Equals("org", StringComparison.OrdinalIgnoreCase) ||
+                                      parts[^2].Equals("gov", StringComparison.OrdinalIgnoreCase) ||
+                                      parts[^2].Equals("edu", StringComparison.OrdinalIgnoreCase) ||
+                                      parts[^2].Equals("net", StringComparison.OrdinalIgnoreCase)))
+            {
+                return (parts[^3], $"{parts[^2]}.{parts[^1]}");
+            }
+
+            return (parts[^2], parts[^1]);
         }
 
         private static readonly Dictionary<string, string[]> KnownServiceDomainClusters = new(StringComparer.OrdinalIgnoreCase)
@@ -252,7 +288,17 @@ namespace AppBlocker.Core.Enforcement
             },
             ["wikipedia.org"] = new[]
             {
-                "wikipedia.org", "www.wikipedia.org", "en.wikipedia.org",
+                "wikipedia.org", "www.wikipedia.org", "wikipedia.com", "www.wikipedia.com", "en.wikipedia.org",
+                "m.wikipedia.org", "mobile.wikipedia.org", "wikimedia.org", "www.wikimedia.org"
+            },
+            ["wikipedia.com"] = new[]
+            {
+                "wikipedia.org", "www.wikipedia.org", "wikipedia.com", "www.wikipedia.com", "en.wikipedia.org",
+                "m.wikipedia.org", "mobile.wikipedia.org", "wikimedia.org", "www.wikimedia.org"
+            },
+            ["wikimedia.org"] = new[]
+            {
+                "wikipedia.org", "www.wikipedia.org", "wikipedia.com", "www.wikipedia.com", "en.wikipedia.org",
                 "m.wikipedia.org", "mobile.wikipedia.org", "wikimedia.org", "www.wikimedia.org"
             },
             ["reddit.com"] = new[]

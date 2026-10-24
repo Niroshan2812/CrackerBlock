@@ -140,5 +140,53 @@ namespace AppBlocker.Tests
             // Should succeed or safely fall back without throwing an unhandled exception
             Assert.True(result || !result);
         }
+
+        [Fact]
+        public void IsHostMatchingRule_RestrictsWikipediaCom_ToWikipediaOrg_AndSubdomains()
+        {
+            // Restricting "www.wikipedia.com" must restrict all variants of Wikipedia (.org and .com)
+            string rule = "www.wikipedia.com";
+
+            Assert.True(HttpsProxyFilteringEngine.IsHostMatchingRule("www.wikipedia.org", rule));
+            Assert.True(HttpsProxyFilteringEngine.IsHostMatchingRule("wikipedia.org", rule));
+            Assert.True(HttpsProxyFilteringEngine.IsHostMatchingRule("en.wikipedia.org", rule));
+            Assert.True(HttpsProxyFilteringEngine.IsHostMatchingRule("m.wikipedia.org", rule));
+            Assert.True(HttpsProxyFilteringEngine.IsHostMatchingRule("wikipedia.com", rule));
+            Assert.True(HttpsProxyFilteringEngine.IsHostMatchingRule("www.wikipedia.com", rule));
+        }
+
+        [Fact]
+        public void IsHostMatchingRule_RestrictsTypoWikipideaCom_ToWikipideaOrg_ViaCrossTldSld()
+        {
+            // The exact user scenario: restricting "www.wikipidea.com" matches "www.wikipidea.org"
+            string rule = "www.wikipidea.com";
+
+            Assert.True(HttpsProxyFilteringEngine.IsHostMatchingRule("www.wikipidea.org", rule));
+            Assert.True(HttpsProxyFilteringEngine.IsHostMatchingRule("wikipidea.org", rule));
+            Assert.True(HttpsProxyFilteringEngine.IsHostMatchingRule("en.wikipidea.org", rule));
+            Assert.True(HttpsProxyFilteringEngine.IsHostMatchingRule("wikipidea.com", rule));
+        }
+
+        [Fact]
+        public void IsHostMatchingRule_KeywordsMatchDomainSegments()
+        {
+            // Bare keyword without TLD
+            string keywordRule = "wikipedia";
+
+            Assert.True(HttpsProxyFilteringEngine.IsHostMatchingRule("www.wikipedia.org", keywordRule));
+            Assert.True(HttpsProxyFilteringEngine.IsHostMatchingRule("en.wikipedia.org", keywordRule));
+            Assert.True(HttpsProxyFilteringEngine.IsHostMatchingRule("wikipedia.com", keywordRule));
+        }
+
+        [Fact]
+        public void IsHostMatchingRule_PreventsFalsePositivesOnUnrelatedDomains()
+        {
+            string rule = "www.wikipedia.com";
+
+            Assert.False(HttpsProxyFilteringEngine.IsHostMatchingRule("wikileaks.org", rule));
+            Assert.False(HttpsProxyFilteringEngine.IsHostMatchingRule("google.com", rule));
+            Assert.False(HttpsProxyFilteringEngine.IsHostMatchingRule("notwikipedia.com", rule));
+            Assert.False(HttpsProxyFilteringEngine.IsHostMatchingRule("wikipediafake.org", rule));
+        }
     }
 }
