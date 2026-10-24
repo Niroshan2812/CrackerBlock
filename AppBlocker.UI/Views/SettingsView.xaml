@@ -135,7 +135,7 @@
                         </Border>
 
                         <!-- 4. SafeSearch Enforcement -->
-                        <Border Background="{StaticResource BgSidebarBrush}" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" CornerRadius="8" Padding="14">
+                        <Border Background="{StaticResource BgSidebarBrush}" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,10">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
@@ -149,6 +149,27 @@
 
                                 <CheckBox Grid.Column="1"
                                           IsChecked="{Binding SafeChildEnforceSafeSearch}"
+                                          Command="{Binding SaveSafeChildSettingsCommand}"
+                                          VerticalAlignment="Center"
+                                          Cursor="Hand" />
+                            </Grid>
+                        </Border>
+
+                        <!-- 5. VPN, Tor & Web Proxy Circumvention Shield -->
+                        <Border Background="{StaticResource BgSidebarBrush}" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" CornerRadius="8" Padding="14">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="🛡️ Block VPNs, Tor &amp; Web Unblockers" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <TextBlock Text="Terminates VPN clients (ProtonVPN, NordVPN, Windscribe, WireGuard, Tor) and blocks proxy unblocker websites." FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
+                                </StackPanel>
+
+                                <CheckBox Grid.Column="1"
+                                          IsChecked="{Binding SafeChildBlockVpnAndBypass}"
                                           Command="{Binding SaveSafeChildSettingsCommand}"
                                           VerticalAlignment="Center"
                                           Cursor="Hand" />
@@ -292,7 +313,7 @@
                     </Border>
 
                     <!-- 2. DNS-over-HTTPS (DoH) Leak Shield -->
-                    <Border Background="{StaticResource BgSidebarBrush}" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" CornerRadius="8" Padding="14">
+                    <Border Background="{StaticResource BgSidebarBrush}" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" CornerRadius="8" Padding="14" Margin="0,0,0,10">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
@@ -315,6 +336,39 @@
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsDnsOverHttpsDisabled}" Value="False">
                                                 <Setter Property="Content" Value="⚠️ DoH Active" />
+                                                <Setter Property="Foreground" Value="{StaticResource WarningBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Button.Style>
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <!-- 3. Mozilla Firefox Proxy Hardening & Enterprise Roots -->
+                    <Border Background="{StaticResource BgSidebarBrush}" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" CornerRadius="8" Padding="14">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="Lock Mozilla Firefox to System Proxy &amp; Trust Roots" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                                <TextBlock Text="Locks Firefox network configuration to use Guardian proxy, trusts Windows enterprise root certificates, and disables private windows." FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
+                            </StackPanel>
+
+                            <Button Grid.Column="1"
+                                    Command="{Binding ToggleFirefoxProxyLockCommand}"
+                                    VerticalAlignment="Center"
+                                    Height="34" Padding="12,6">
+                                <Button.Style>
+                                    <Style TargetType="Button" BasedOn="{StaticResource ModernSecondaryButton}">
+                                        <Setter Property="Content" Value="🛡️ Firefox Proxy Locked" />
+                                        <Setter Property="Foreground" Value="{StaticResource SuccessBrush}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsFirefoxProxyLocked}" Value="False">
+                                                <Setter Property="Content" Value="⚠️ Firefox Unrestricted" />
                                                 <Setter Property="Foreground" Value="{StaticResource WarningBrush}" />
                                             </DataTrigger>
                                         </Style.Triggers>
@@ -373,6 +427,26 @@
                         </Border>
                     </Grid>
                 </StackPanel>
+            </Border>
+
+            <!-- Windows Startup & Silent Tray Auto-Launch Card -->
+            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="🚀 Launch CrackerBlock on Windows Startup" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                        <TextBlock Text="Automatically launches CrackerBlock in silent system tray mode when Windows starts, keeping protection and desktop alerts active." FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <CheckBox Grid.Column="1"
+                              IsChecked="{Binding IsLaunchOnStartupEnabled}"
+                              VerticalAlignment="Center"
+                              Cursor="Hand" />
+                </Grid>
             </Border>
 
             <!-- Desktop Notifications & Real-Time Alerts Card -->

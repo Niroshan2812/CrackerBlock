@@ -106,6 +106,7 @@ namespace AppBlocker.Core.IPC
     {
         public bool DisableIncognito { get; set; } = true;
         public bool DisableDnsOverHttps { get; set; } = true;
+        public bool LockFirefoxProxy { get; set; } = true;
     }
 
     public class WatchdogStatusDto
@@ -150,5 +151,6 @@ namespace AppBlocker.Core.IPC
         public bool BlockSocialMedia { get; set; } = true;
         public bool BlockGaming { get; set; } = true;
         public bool EnforceSafeSearch { get; set; } = true;
+        public bool BlockVpnAndBypass { get; set; } = true;
     }
 }

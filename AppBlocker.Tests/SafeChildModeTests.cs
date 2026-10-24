@@ -208,5 +208,47 @@ namespace AppBlocker.Tests
             Assert.True(service2.BlockGaming);
             Assert.True(service2.EnforceSafeSearch);
         }
+
+        [Fact]
+        public void SafeChildMode_RestrictsVpnAndProxyTools()
+        {
+            var service = new SafeChildModeService(_testSettingsPath)
+            {
+                IsEnabled = true,
+                BlockVpnAndBypass = true
+            };
+
+            // VPN executables
+            Assert.True(service.IsProcessRestricted("protonvpn.exe", out var r1));
+            Assert.Contains("VPN", r1);
+
+            Assert.True(service.IsProcessRestricted("NordVPN.exe", out _));
+            Assert.True(service.IsProcessRestricted("windscribe.exe", out _));
+            Assert.True(service.IsProcessRestricted("tor.exe", out _));
+            Assert.True(service.IsProcessRestricted("wireguard.exe", out _));
+            Assert.True(service.IsProcessRestricted("ultrasurf.exe", out _));
+
+            // Web proxy domains
+            Assert.True(service.IsHostRestricted("kproxy.com", out var r2));
+            Assert.Contains("Proxy", r2);
+
+            Assert.True(service.IsHostRestricted("www.croxyproxy.com", out _));
+            Assert.True(service.IsHostRestricted("proxysite.com", out _));
+            Assert.True(service.IsHostRestricted("blockaway.net", out _));
+        }
+
+        [Fact]
+        public void SafeChildMode_AllowsVpnWhenBypassToggleIsDisabled()
+        {
+            var service = new SafeChildModeService(_testSettingsPath)
+            {
+                IsEnabled = true,
+                BlockVpnAndBypass = false
+            };
+
+            Assert.False(service.IsProcessRestricted("protonvpn.exe", out _));
+            Assert.False(service.IsProcessRestricted("tor.exe", out _));
+            Assert.False(service.IsHostRestricted("kproxy.com", out _));
+        }
     }
 }

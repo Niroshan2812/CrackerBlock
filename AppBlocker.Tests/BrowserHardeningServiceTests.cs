@@ -10,11 +10,12 @@ namespace AppBlocker.Tests
         public void BrowserHardeningService_InstantiatesAndQueriesStatusWithoutError()
         {
             var service = new BrowserHardeningService();
-            var (incognito, doh) = service.GetCurrentStatus();
+            var (incognito, doh, firefoxProxy) = service.GetCurrentStatus();
 
             // Status should be boolean without exceptions
             Assert.True(incognito || !incognito);
             Assert.True(doh || !doh);
+            Assert.True(firefoxProxy || !firefoxProxy);
         }
 
         [Fact]
@@ -22,8 +23,8 @@ namespace AppBlocker.Tests
         {
             var service = new BrowserHardeningService();
 
-            // Apply hardening
-            var applied = service.ApplyHardening(disableIncognito: true, disableDnsOverHttps: true);
+            // Apply hardening including Firefox proxy lock
+            var applied = service.ApplyHardening(disableIncognito: true, disableDnsOverHttps: true, lockFirefoxProxy: true);
             // On Windows test environment, this call succeeds or gracefully handles permissions
             Assert.True(applied || !applied);
 

@@ -119,7 +119,7 @@ namespace AppBlocker.Core.Enforcement
             List<CustomSchedule> currentCustomSchedules;
             lock (_rulesLock)
             {
-                if (_activeRules.Count == 0)
+                if (_activeRules.Count == 0 && (SafeChildMode == null || !SafeChildMode.IsEnabled))
                 {
                     return 0;
                 }

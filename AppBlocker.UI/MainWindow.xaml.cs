@@ -69,6 +69,19 @@ namespace AppBlocker.UI
             {
                 Console.WriteLine($"Notification watcher start error: {ex.Message}");
             }
+
+            // Check command line arguments for silent system tray startup
+            var args = Environment.GetCommandLineArgs();
+            bool startInTray = System.Linq.Enumerable.Any(args, a => 
+                a.Equals("--tray", StringComparison.OrdinalIgnoreCase) || 
+                a.Equals("--minimized", StringComparison.OrdinalIgnoreCase) ||
+                a.Equals("-tray", StringComparison.OrdinalIgnoreCase));
+
+            if (startInTray)
+            {
+                WindowState = WindowState.Minimized;
+                Hide();
+            }
         }
 
         private void MainWindow_Closing(object? sender, CancelEventArgs e)

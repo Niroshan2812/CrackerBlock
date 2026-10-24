@@ -107,12 +107,13 @@ namespace AppBlocker.UI.Services
             return false;
         }
 
-        public async Task<IpcResponse> SetBrowserHardeningStateAsync(bool disableIncognito, bool disableDnsOverHttps)
+        public async Task<IpcResponse> SetBrowserHardeningStateAsync(bool disableIncognito, bool disableDnsOverHttps, bool lockFirefoxProxy = true)
         {
             var dto = new BrowserHardeningDto
             {
                 DisableIncognito = disableIncognito,
-                DisableDnsOverHttps = disableDnsOverHttps
+                DisableDnsOverHttps = disableDnsOverHttps,
+                LockFirefoxProxy = lockFirefoxProxy
             };
             return await _client.SendCommandAsync(IpcConstants.Commands.SetBrowserHardeningState, dto);
         }
@@ -124,7 +125,7 @@ namespace AppBlocker.UI.Services
             {
                 return response.GetPayload<BrowserHardeningDto>() ?? new BrowserHardeningDto();
             }
-            return new BrowserHardeningDto { DisableIncognito = false, DisableDnsOverHttps = false };
+            return new BrowserHardeningDto { DisableIncognito = false, DisableDnsOverHttps = false, LockFirefoxProxy = false };
         }
 
         public async Task<WatchdogStatusDto> GetWatchdogStatusAsync()

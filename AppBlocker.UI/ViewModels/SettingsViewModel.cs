@@ -32,6 +32,12 @@ namespace AppBlocker.UI.ViewModels
         private bool _isDnsOverHttpsDisabled = true;
 
         [ObservableProperty]
+        private bool _isFirefoxProxyLocked = true;
+
+        [ObservableProperty]
+        private bool _isLaunchOnStartupEnabled;
+
+        [ObservableProperty]
         private bool _isWatchdogActive = true;
 
         [ObservableProperty]
@@ -72,6 +78,9 @@ namespace AppBlocker.UI.ViewModels
         private bool _safeChildEnforceSafeSearch = true;
 
         [ObservableProperty]
+        private bool _safeChildBlockVpnAndBypass = true;
+
+        [ObservableProperty]
         private string _safeChildStatusText = "Shield disabled. Protection inactive.";
 
         // Desktop Notifications & Real-Time Alerts
@@ -95,6 +104,27 @@ namespace AppBlocker.UI.ViewModels
             _isToastNotificationsEnabled = NotificationService.Instance.IsToastEnabled;
             _isNotificationSoundEnabled = NotificationService.Instance.IsSoundEnabled;
             _isBalloonAlertsEnabled = NotificationService.Instance.IsBalloonEnabled;
+
+            try
+            {
+                _isLaunchOnStartupEnabled = StartupRegistrationService.IsLaunchOnStartupEnabled();
+            }
+            catch { }
+        }
+
+        partial void OnIsLaunchOnStartupEnabledChanged(bool value)
+        {
+            try
+            {
+                StartupRegistrationService.SetLaunchOnStartup(value);
+                GeneralStatusMessage = value
+                    ? "🚀 CrackerBlock will now start automatically in the system tray when Windows boots."
+                    : "Startup registration removed. CrackerBlock will only run when opened manually.";
+            }
+            catch (Exception ex)
+            {
+                GeneralStatusMessage = $"Failed to update startup configuration: {ex.Message}";
+            }
         }
 
         partial void OnIsToastNotificationsEnabledChanged(bool value)
@@ -119,6 +149,12 @@ namespace AppBlocker.UI.ViewModels
                 var isAvailable = await _ipcClient.IsServiceAvailableAsync();
                 IsServiceConnected = isAvailable;
 
+                try
+                {
+                    IsLaunchOnStartupEnabled = StartupRegistrationService.IsLaunchOnStartupEnabled();
+                }
+                catch { }
+
                 if (isAvailable)
                 {
                     var status = await _ipcClient.GetStatusAsync();
@@ -137,6 +173,7 @@ namespace AppBlocker.UI.ViewModels
                     var browserState = await _ipcClient.GetBrowserHardeningStateAsync();
                     IsIncognitoDisabled = browserState.DisableIncognito;
                     IsDnsOverHttpsDisabled = browserState.DisableDnsOverHttps;
+                    IsFirefoxProxyLocked = browserState.LockFirefoxProxy;
 
                     var watchdogState = await _ipcClient.GetWatchdogStatusAsync();
                     IsWatchdogActive = watchdogState.IsWatchdogActive;
@@ -150,8 +187,9 @@ namespace AppBlocker.UI.ViewModels
                     SafeChildBlockSocialMedia = childState.BlockSocialMedia;
                     SafeChildBlockGaming = childState.BlockGaming;
                     SafeChildEnforceSafeSearch = childState.EnforceSafeSearch;
+                    SafeChildBlockVpnAndBypass = childState.BlockVpnAndBypass;
                     SafeChildStatusText = IsSafeChildModeEnabled
-                        ? "Active & Protecting: Adult, Social Media & Gaming restricted."
+                        ? "Active & Protecting: Adult, Social Media, Gaming & VPNs restricted."
                         : "Shield disabled. Protection inactive.";
                 }
                 else
@@ -197,7 +235,7 @@ namespace AppBlocker.UI.ViewModels
         private async Task ToggleIncognitoAsync()
         {
             var newState = !IsIncognitoDisabled;
-            var resp = await _ipcClient.SetBrowserHardeningStateAsync(newState, IsDnsOverHttpsDisabled);
+            var resp = await _ipcClient.SetBrowserHardeningStateAsync(newState, IsDnsOverHttpsDisabled, IsFirefoxProxyLocked);
             IsIncognitoDisabled = newState;
             GeneralStatusMessage = resp.Message ?? $"Incognito / InPrivate browsing {(newState ? "disabled" : "enabled")}.";
         }
@@ -206,9 +244,18 @@ namespace AppBlocker.UI.ViewModels
         private async Task ToggleDnsOverHttpsAsync()
         {
             var newState = !IsDnsOverHttpsDisabled;
-            var resp = await _ipcClient.SetBrowserHardeningStateAsync(IsIncognitoDisabled, newState);
+            var resp = await _ipcClient.SetBrowserHardeningStateAsync(IsIncognitoDisabled, newState, IsFirefoxProxyLocked);
             IsDnsOverHttpsDisabled = newState;
             GeneralStatusMessage = resp.Message ?? $"DNS-over-HTTPS leak protection {(newState ? "enforced" : "disabled")}.";
+        }
+
+        [RelayCommand]
+        private async Task ToggleFirefoxProxyLockAsync()
+        {
+            var newState = !IsFirefoxProxyLocked;
+            var resp = await _ipcClient.SetBrowserHardeningStateAsync(IsIncognitoDisabled, IsDnsOverHttpsDisabled, newState);
+            IsFirefoxProxyLocked = newState;
+            GeneralStatusMessage = resp.Message ?? $"Mozilla Firefox system proxy lock {(newState ? "enforced" : "disabled")}.";
         }
 
         [RelayCommand]
@@ -285,12 +332,13 @@ namespace AppBlocker.UI.ViewModels
                 BlockAdultSites = SafeChildBlockAdultSites,
                 BlockSocialMedia = SafeChildBlockSocialMedia,
                 BlockGaming = SafeChildBlockGaming,
-                EnforceSafeSearch = SafeChildEnforceSafeSearch
+                EnforceSafeSearch = SafeChildEnforceSafeSearch,
+                BlockVpnAndBypass = SafeChildBlockVpnAndBypass
             };
 
             await _ipcClient.SetSafeChildModeStateAsync(dto);
             SafeChildStatusText = IsSafeChildModeEnabled
-                ? "Active & Protecting: Adult, Social Media & Gaming restricted."
+                ? "Active & Protecting: Adult, Social Media, Gaming & VPNs restricted."
                 : "Shield disabled. Protection inactive.";
             GeneralStatusMessage = IsSafeChildModeEnabled
                 ? "👶 Safe Child Shield activated! Restrictions are now actively enforced."

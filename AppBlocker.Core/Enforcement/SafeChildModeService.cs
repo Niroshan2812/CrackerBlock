@@ -14,6 +14,7 @@ namespace AppBlocker.Core.Enforcement
         public bool BlockSocialMedia { get; set; } = true;
         public bool BlockGaming { get; set; } = true;
         public bool EnforceSafeSearch { get; set; } = true;
+        public bool BlockVpnAndBypass { get; set; } = true;
     }
 
     public class SafeChildModeService
@@ -27,6 +28,7 @@ namespace AppBlocker.Core.Enforcement
         public bool BlockSocialMedia { get; set; } = true;
         public bool BlockGaming { get; set; } = true;
         public bool EnforceSafeSearch { get; set; } = true;
+        public bool BlockVpnAndBypass { get; set; } = true;
 
         public event Action<bool>? StateChanged;
 
@@ -83,6 +85,39 @@ namespace AppBlocker.Core.Enforcement
             "fortniteclient-win64-shipping"
         };
 
+        // Curated VPN and Proxy circumvention process names
+        private static readonly HashSet<string> VpnAndBypassProcessNames = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "protonvpn", "protonvpn.service", "protonvpn-service",
+            "nordvpn", "nordvpn-service",
+            "windscribe", "windscribe-service",
+            "expressvpn", "expressvpn-notification-service",
+            "hotspotshield", "hsscp",
+            "tunnelbear",
+            "mullvad-vpn", "mullvad-daemon",
+            "surfshark", "surfshark-service",
+            "cyberghost",
+            "pia-client",
+            "openvpn", "openvpn-gui",
+            "wireguard",
+            "cloudflare-warp", "warp-svc",
+            "tor", "obfs4proxy",
+            "ultrasurf", "u1903", "u2004", "u2101",
+            "psiphon3", "psiphon-tunnel-core",
+            "lantern",
+            "shadowsocks", "shadowsocksr",
+            "v2ray", "xray", "clash", "clash-verge", "nekoray"
+        };
+
+        // Curated Web Proxy and Unblocker domains
+        private static readonly HashSet<string> WebProxyDomains = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "kproxy.com", "croxyproxy.com", "proxysite.com", "hide.me", "4everproxy.com",
+            "blockaway.net", "vpnbook.com", "filterbypass.me", "whoer.net", "hidester.com",
+            "proxfree.com", "zalmos.com", "vpnunblocker.com", "proxyium.com", "my-proxy.com",
+            "plainproxies.com", "anonymouse.org", "123proxy.net", "webproxy.to"
+        };
+
         public SafeChildModeService(string? customSettingsPath = null, Action<string>? logger = null)
         {
             _logger = logger;
@@ -107,7 +142,8 @@ namespace AppBlocker.Core.Enforcement
                             BlockSocialMedia = settings.BlockSocialMedia;
                             BlockGaming = settings.BlockGaming;
                             EnforceSafeSearch = settings.EnforceSafeSearch;
-                            _logger?.Invoke($"SafeChildMode loaded: Active={IsEnabled}, Adult={BlockAdultSites}, Social={BlockSocialMedia}, Gaming={BlockGaming}");
+                            BlockVpnAndBypass = settings.BlockVpnAndBypass;
+                            _logger?.Invoke($"SafeChildMode loaded: Active={IsEnabled}, Adult={BlockAdultSites}, Social={BlockSocialMedia}, Gaming={BlockGaming}, VpnBypass={BlockVpnAndBypass}");
                             return;
                         }
                     }
@@ -130,6 +166,7 @@ namespace AppBlocker.Core.Enforcement
                     BlockSocialMedia = settings.BlockSocialMedia;
                     BlockGaming = settings.BlockGaming;
                     EnforceSafeSearch = settings.EnforceSafeSearch;
+                    BlockVpnAndBypass = settings.BlockVpnAndBypass;
 
                     var dir = Path.GetDirectoryName(_settingsFilePath);
                     if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
@@ -196,22 +233,44 @@ namespace AppBlocker.Core.Enforcement
                 }
             }
 
+            // 4. Web Proxy & Circumvention Portals
+            if (BlockVpnAndBypass)
+            {
+                if (WebProxyDomains.Any(d => cleanHost.Equals(d, StringComparison.OrdinalIgnoreCase) || cleanHost.EndsWith("." + d, StringComparison.OrdinalIgnoreCase)))
+                {
+                    reason = "Web Proxy / Circumvention Portal";
+                    return true;
+                }
+
+                if (!string.IsNullOrEmpty(sld) && (sld.Contains("unblocker", StringComparison.OrdinalIgnoreCase) || sld.Contains("webproxy", StringComparison.OrdinalIgnoreCase)))
+                {
+                    reason = "Web Proxy / Circumvention Portal";
+                    return true;
+                }
+            }
+
             return false;
         }
 
         public bool IsProcessRestricted(string processName, out string reason)
         {
             reason = string.Empty;
-            if (!IsEnabled || !BlockGaming || string.IsNullOrWhiteSpace(processName))
+            if (!IsEnabled || string.IsNullOrWhiteSpace(processName))
             {
                 return false;
             }
 
             var cleanName = Path.GetFileNameWithoutExtension(processName).Trim().ToLowerInvariant();
 
-            if (GamingProcessNames.Contains(cleanName))
+            if (BlockGaming && GamingProcessNames.Contains(cleanName))
             {
                 reason = "Addictive Gaming Application";
+                return true;
+            }
+
+            if (BlockVpnAndBypass && VpnAndBypassProcessNames.Contains(cleanName))
+            {
+                reason = "VPN / Proxy Circumvention Tool";
                 return true;
             }
 

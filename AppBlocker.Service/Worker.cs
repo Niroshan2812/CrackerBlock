@@ -108,7 +108,7 @@ namespace AppBlocker.Service
             // Apply Browser Anti-Bypass Hardening (Disable Incognito & DoH leaks)
             try
             {
-                _browserHardeningService.ApplyHardening(disableIncognito: true, disableDnsOverHttps: true);
+                _browserHardeningService.ApplyHardening(disableIncognito: true, disableDnsOverHttps: true, lockFirefoxProxy: true);
             }
             catch (Exception ex)
             {
@@ -683,17 +683,18 @@ namespace AppBlocker.Service
                 case IpcConstants.Commands.SetBrowserHardeningState:
                 {
                     var dto = request.GetPayload<BrowserHardeningDto>() ?? new BrowserHardeningDto();
-                    var success = _browserHardeningService.ApplyHardening(dto.DisableIncognito, dto.DisableDnsOverHttps);
-                    return IpcResponse.Ok(request.Id, $"Browser hardening updated: IncognitoDisabled={dto.DisableIncognito}, DoHDisabled={dto.DisableDnsOverHttps}", dto);
+                    var success = _browserHardeningService.ApplyHardening(dto.DisableIncognito, dto.DisableDnsOverHttps, dto.LockFirefoxProxy);
+                    return IpcResponse.Ok(request.Id, $"Browser hardening updated: IncognitoDisabled={dto.DisableIncognito}, DoHDisabled={dto.DisableDnsOverHttps}, FirefoxProxyLocked={dto.LockFirefoxProxy}", dto);
                 }
 
                 case IpcConstants.Commands.GetBrowserHardeningState:
                 {
-                    var (incognito, doh) = _browserHardeningService.GetCurrentStatus();
+                    var (incognito, doh, ffProxy) = _browserHardeningService.GetCurrentStatus();
                     return IpcResponse.Ok(request.Id, "Browser hardening state retrieved", new BrowserHardeningDto
                     {
                         DisableIncognito = incognito,
-                        DisableDnsOverHttps = doh
+                        DisableDnsOverHttps = doh,
+                        LockFirefoxProxy = ffProxy
                     });
                 }
 
@@ -934,7 +935,8 @@ namespace AppBlocker.Service
                             BlockAdultSites = dto.BlockAdultSites,
                             BlockSocialMedia = dto.BlockSocialMedia,
                             BlockGaming = dto.BlockGaming,
-                            EnforceSafeSearch = dto.EnforceSafeSearch
+                            EnforceSafeSearch = dto.EnforceSafeSearch,
+                            BlockVpnAndBypass = dto.BlockVpnAndBypass
                         };
                         _safeChildModeService.SaveSettings(settings);
 
@@ -946,7 +948,7 @@ namespace AppBlocker.Service
                                 Timestamp = DateTime.UtcNow,
                                 EventType = dto.IsEnabled ? "Safe Child Enabled" : "Safe Child Disabled",
                                 Description = dto.IsEnabled
-                                    ? "Safe Child Shield activated (Adult, Social Media, Gaming restrictions engaged)."
+                                    ? "Safe Child Shield activated (Adult, Social Media, Gaming, VPN restrictions engaged)."
                                     : "Safe Child Shield deactivated by administrator."
                             });
                             await db.SaveChangesAsync();
@@ -966,7 +968,8 @@ namespace AppBlocker.Service
                         BlockAdultSites = _safeChildModeService.BlockAdultSites,
                         BlockSocialMedia = _safeChildModeService.BlockSocialMedia,
                         BlockGaming = _safeChildModeService.BlockGaming,
-                        EnforceSafeSearch = _safeChildModeService.EnforceSafeSearch
+                        EnforceSafeSearch = _safeChildModeService.EnforceSafeSearch,
+                        BlockVpnAndBypass = _safeChildModeService.BlockVpnAndBypass
                     };
                     return IpcResponse.Ok(request.Id, "Safe Child Mode state retrieved.", dto);
                 }
