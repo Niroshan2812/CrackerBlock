@@ -20,6 +20,105 @@
                 <TextBlock Text="{Binding GeneralStatusMessage}" Foreground="{StaticResource SuccessBrush}" FontSize="13" />
             </Border>
 
+            <!-- 🩺 1-Click System Diagnostics & Self-Healing Wizard Card -->
+            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,20" CornerRadius="12" Padding="20">
+                <StackPanel>
+                    <!-- Header & Action Row -->
+                    <Grid Margin="0,0,0,16">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                <TextBlock Text="🩺 " FontSize="18" VerticalAlignment="Center" />
+                                <TextBlock Text="System Diagnostics &amp; Self-Healing Wizard" FontSize="17" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                
+                                <!-- Health Score Badge -->
+                                <Border Margin="14,0,0,0" CornerRadius="12" Padding="10,3" VerticalAlignment="Center"
+                                        Background="#1E293B" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1">
+                                    <TextBlock Text="{Binding DiagnosticsBadgeText}" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentCyanBrush}" />
+                                </Border>
+                            </StackPanel>
+                            <TextBlock Text="{Binding DiagnosticsSummaryText}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <!-- Action Buttons -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Content="🔍 Run Health Check"
+                                    Command="{Binding RunDiagnosticsCommand}"
+                                    IsEnabled="{Binding IsDiagnosticsRunning, Converter={StaticResource InverseBoolConverter}}"
+                                    Style="{StaticResource ModernSecondaryButton}"
+                                    Height="38" Padding="14,6" Margin="0,0,10,0" />
+
+                            <Button Content="🔧 Auto-Repair All Issues"
+                                    Command="{Binding AutoRepairAllCommand}"
+                                    IsEnabled="{Binding IsDiagnosticsRunning, Converter={StaticResource InverseBoolConverter}}"
+                                    Style="{StaticResource ModernPrimaryButton}"
+                                    Background="{StaticResource SuccessBrush}"
+                                    Height="38" Padding="16,6" />
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Loading / Scan in progress indicator -->
+                    <ProgressBar IsIndeterminate="True" Height="3" Margin="0,0,0,14"
+                                 Visibility="{Binding IsDiagnosticsRunning, Converter={StaticResource BoolToVisConverter}}"
+                                 Foreground="{StaticResource AccentCyanBrush}" Background="#1A2035" BorderThickness="0" />
+
+                    <!-- Checklist of 9 Diagnostic Items -->
+                    <ItemsControl ItemsSource="{Binding DiagnosticItems}"
+                                  Visibility="{Binding IsDiagnosticsCompleted, Converter={StaticResource BoolToVisConverter}}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Background="{StaticResource BgSidebarBrush}" BorderBrush="{StaticResource BorderCardBrush}" 
+                                        BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,0,8">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="34" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <!-- Status Icon -->
+                                        <TextBlock Grid.Column="0" Text="{Binding Status, Converter={StaticResource DiagnosticIconConverter}}" 
+                                                   FontSize="16" VerticalAlignment="Center" HorizontalAlignment="Left" />
+
+                                        <!-- Name & Details -->
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="4,0,12,0">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                                                <TextBlock Text=" • " FontSize="12" Foreground="{StaticResource TextMutedBrush}" />
+                                                <TextBlock Text="{Binding Category}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding Details}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" TextWrapping="Wrap" />
+                                        </StackPanel>
+
+                                        <!-- Status Pill Badge -->
+                                        <Border Grid.Column="2" CornerRadius="6" Padding="8,3" VerticalAlignment="Center" Margin="0,0,10,0"
+                                                Background="{Binding Status, Converter={StaticResource DiagnosticBgConverter}}"
+                                                BorderThickness="1">
+                                            <TextBlock Text="{Binding Status}" FontSize="11" FontWeight="SemiBold"
+                                                       Foreground="{Binding Status, Converter={StaticResource DiagnosticColorConverter}}" />
+                                        </Border>
+
+                                        <!-- Individual Fix Button -->
+                                        <Button Grid.Column="3"
+                                                Content="Fix Issue"
+                                                Command="{Binding DataContext.RepairSpecificItemCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding Id}"
+                                                Visibility="{Binding CanAutoRepair, Converter={StaticResource BoolToVisConverter}}"
+                                                Style="{StaticResource ModernSecondaryButton}"
+                                                Height="28" Padding="10,2" FontSize="11" VerticalAlignment="Center" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
             <!-- Safe Child Mode (Parental Shield) Card -->
             <Border Margin="0,0,0,20" CornerRadius="12" Padding="20">
                 <Border.Style>

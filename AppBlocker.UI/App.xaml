@@ -12,6 +12,9 @@
         <converters:StringNotNullOrEmptyToVisibilityConverter x:Key="StringEmptyToVisConverter" Invert="True" />
         <converters:EqualityToVisibilityConverter x:Key="EqualityToVisConverter" />
         <converters:EqualityToBoolConverter x:Key="EqualityToBoolConverter" />
+        <converters:DiagnosticStatusToColorConverter x:Key="DiagnosticColorConverter" />
+        <converters:DiagnosticStatusToBackgroundConverter x:Key="DiagnosticBgConverter" />
+        <converters:DiagnosticStatusToIconConverter x:Key="DiagnosticIconConverter" />
 
         <!-- Modern Dark Palette -->
         <Color x:Key="BgMainColor">#0F111A</Color>

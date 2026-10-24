@@ -203,5 +203,42 @@ namespace AppBlocker.UI.Services
             }
             return new SafeChildModeDto();
         }
+
+        public async Task<AppBlocker.Core.Diagnostics.DiagnosticsReport> RunDiagnosticsAsync()
+        {
+            var isAvailable = await IsServiceAvailableAsync();
+            if (isAvailable)
+            {
+                var response = await _client.SendCommandAsync(IpcConstants.Commands.RunDiagnostics);
+                if (response.Success && !string.IsNullOrEmpty(response.Payload))
+                {
+                    var report = response.GetPayload<AppBlocker.Core.Diagnostics.DiagnosticsReport>();
+                    if (report != null) return report;
+                }
+            }
+
+            // Fallback: Run local standalone diagnostics when background service is unreachable
+            var localDiag = new AppBlocker.Core.Diagnostics.SystemDiagnosticsService();
+            return await localDiag.RunDiagnosticsAsync();
+        }
+
+        public async Task<AppBlocker.Core.Diagnostics.RepairDiagnosticsResult> RepairDiagnosticsAsync(List<string>? specificCheckIds = null)
+        {
+            var isAvailable = await IsServiceAvailableAsync();
+            if (isAvailable)
+            {
+                var req = new AppBlocker.Core.Diagnostics.RepairDiagnosticsRequest { CheckIds = specificCheckIds };
+                var response = await _client.SendCommandAsync(IpcConstants.Commands.RepairDiagnostics, req);
+                if (response.Success && !string.IsNullOrEmpty(response.Payload))
+                {
+                    var result = response.GetPayload<AppBlocker.Core.Diagnostics.RepairDiagnosticsResult>();
+                    if (result != null) return result;
+                }
+            }
+
+            // Fallback: Run local repairs
+            var localDiag = new AppBlocker.Core.Diagnostics.SystemDiagnosticsService();
+            return await localDiag.AutoRepairAllAsync(specificCheckIds);
+        }
     }
 }

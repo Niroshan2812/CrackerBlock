@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using AppBlocker.Core.Diagnostics;
 using AppBlocker.Core.Security;
 using AppBlocker.UI.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -92,6 +95,28 @@ namespace AppBlocker.UI.ViewModels
 
         [ObservableProperty]
         private bool _isBalloonAlertsEnabled = true;
+
+        // 1-Click Diagnostics & Self-Healing Wizard
+        [ObservableProperty]
+        private bool _isDiagnosticsRunning;
+
+        [ObservableProperty]
+        private bool _isDiagnosticsCompleted;
+
+        [ObservableProperty]
+        private bool _isDiagnosticsRepaired;
+
+        [ObservableProperty]
+        private int _diagnosticsHealthScore = 100;
+
+        [ObservableProperty]
+        private string _diagnosticsSummaryText = "Run a full scan to verify Guardian services, proxy certificates, and anti-bypass shields.";
+
+        [ObservableProperty]
+        private string _diagnosticsBadgeText = "UNTESTED";
+
+        [ObservableProperty]
+        private ObservableCollection<DiagnosticCheckItem> _diagnosticItems = new();
 
         private int _testNotificationIndex = 0;
 
@@ -349,6 +374,109 @@ namespace AppBlocker.UI.ViewModels
         {
             PinStatusMessage = msg;
             IsPinSuccess = success;
+        }
+
+        [RelayCommand]
+        public async Task RunDiagnosticsAsync()
+        {
+            IsDiagnosticsRunning = true;
+            DiagnosticsSummaryText = "Running 9-point system health & security inspection...";
+            try
+            {
+                var report = await _ipcClient.RunDiagnosticsAsync();
+                DiagnosticItems.Clear();
+                foreach (var item in report.Items)
+                {
+                    DiagnosticItems.Add(item);
+                }
+                DiagnosticsHealthScore = report.OverallHealthScore;
+                IsDiagnosticsCompleted = true;
+
+                if (report.FailedCount == 0 && report.WarningCount == 0)
+                {
+                    DiagnosticsBadgeText = "100% HEALTHY";
+                    DiagnosticsSummaryText = $"All {report.TotalCount} systems operational. Defense-in-depth shield fully engaged.";
+                }
+                else
+                {
+                    DiagnosticsBadgeText = $"{report.OverallHealthScore}% HEALTH";
+                    DiagnosticsSummaryText = $"{report.FailedCount} critical issue(s), {report.WarningCount} warning(s) detected. Click 'Auto-Repair All Issues' to resolve.";
+                }
+            }
+            catch (Exception ex)
+            {
+                DiagnosticsSummaryText = $"Diagnostic scan error: {ex.Message}";
+            }
+            finally
+            {
+                IsDiagnosticsRunning = false;
+            }
+        }
+
+        [RelayCommand]
+        public async Task AutoRepairAllAsync()
+        {
+            IsDiagnosticsRunning = true;
+            DiagnosticsSummaryText = "Applying automated self-healing routines across services, proxy, and certificates...";
+            try
+            {
+                var result = await _ipcClient.RepairDiagnosticsAsync();
+                DiagnosticItems.Clear();
+                foreach (var item in result.UpdatedReport.Items)
+                {
+                    DiagnosticItems.Add(item);
+                }
+                DiagnosticsHealthScore = result.UpdatedReport.OverallHealthScore;
+                IsDiagnosticsCompleted = true;
+                IsDiagnosticsRepaired = true;
+
+                if (result.UpdatedReport.FailedCount == 0 && result.UpdatedReport.WarningCount == 0)
+                {
+                    DiagnosticsBadgeText = "100% HEALTHY";
+                    DiagnosticsSummaryText = $"✅ Self-healing complete! All {result.UpdatedReport.TotalCount} components successfully verified & repaired.";
+                }
+                else
+                {
+                    DiagnosticsBadgeText = $"{result.UpdatedReport.OverallHealthScore}% HEALTH";
+                    DiagnosticsSummaryText = result.Message;
+                }
+                GeneralStatusMessage = "🔧 Self-healing routines executed successfully!";
+            }
+            catch (Exception ex)
+            {
+                DiagnosticsSummaryText = $"Self-healing error: {ex.Message}";
+            }
+            finally
+            {
+                IsDiagnosticsRunning = false;
+            }
+        }
+
+        [RelayCommand]
+        public async Task RepairSpecificItemAsync(string? checkId)
+        {
+            if (string.IsNullOrWhiteSpace(checkId)) return;
+
+            IsDiagnosticsRunning = true;
+            try
+            {
+                var result = await _ipcClient.RepairDiagnosticsAsync(new List<string> { checkId });
+                DiagnosticItems.Clear();
+                foreach (var item in result.UpdatedReport.Items)
+                {
+                    DiagnosticItems.Add(item);
+                }
+                DiagnosticsHealthScore = result.UpdatedReport.OverallHealthScore;
+                GeneralStatusMessage = $"Repaired check '{checkId}'.";
+            }
+            catch (Exception ex)
+            {
+                GeneralStatusMessage = $"Repair error: {ex.Message}";
+            }
+            finally
+            {
+                IsDiagnosticsRunning = false;
+            }
         }
     }
 }

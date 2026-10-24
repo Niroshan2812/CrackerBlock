@@ -34,6 +34,8 @@ namespace AppBlocker.Core.IPC
             public const string ToggleCustomSchedule = "ToggleCustomSchedule";
             public const string SetSafeChildModeState = "SetSafeChildModeState";
             public const string GetSafeChildModeState = "GetSafeChildModeState";
+            public const string RunDiagnostics = "RunDiagnostics";
+            public const string RepairDiagnostics = "RepairDiagnostics";
         }
     }
 }

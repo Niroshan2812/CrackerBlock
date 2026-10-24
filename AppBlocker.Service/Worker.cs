@@ -26,6 +26,7 @@ namespace AppBlocker.Service
         private readonly WatchdogCoordinator _watchdogCoordinator;
         private readonly FocusSessionService _focusSessionService;
         private readonly SafeChildModeService _safeChildModeService;
+        private readonly AppBlocker.Core.Diagnostics.SystemDiagnosticsService _diagnosticsService;
         private Process? _watchdogProcess;
         private DateTime _lastWatchdogCheck = DateTime.MinValue;
         private NamedPipeIpcServer? _ipcServer;
@@ -68,6 +69,7 @@ namespace AppBlocker.Service
             _safeChildModeService = new SafeChildModeService(null, msg => _logger.LogInformation("{Message}", msg));
             _appLockingEngine.SafeChildMode = _safeChildModeService;
             _httpsProxyEngine.SafeChildMode = _safeChildModeService;
+            _diagnosticsService = new AppBlocker.Core.Diagnostics.SystemDiagnosticsService(_httpsProxyEngine, msg => _logger.LogInformation("{Message}", msg));
         }
 
         private void SyncFocusState()
@@ -972,6 +974,19 @@ namespace AppBlocker.Service
                         BlockVpnAndBypass = _safeChildModeService.BlockVpnAndBypass
                     };
                     return IpcResponse.Ok(request.Id, "Safe Child Mode state retrieved.", dto);
+                }
+
+                case IpcConstants.Commands.RunDiagnostics:
+                {
+                    var report = await _diagnosticsService.RunDiagnosticsAsync();
+                    return IpcResponse.Ok(request.Id, $"Diagnostics complete: {report.OverallHealthScore}% healthy", report);
+                }
+
+                case IpcConstants.Commands.RepairDiagnostics:
+                {
+                    var req = request.GetPayload<AppBlocker.Core.Diagnostics.RepairDiagnosticsRequest>();
+                    var result = await _diagnosticsService.AutoRepairAllAsync(req?.CheckIds);
+                    return IpcResponse.Ok(request.Id, result.Message, result);
                 }
 
                 default:

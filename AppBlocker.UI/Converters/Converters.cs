@@ -90,4 +90,65 @@ namespace AppBlocker.UI.Converters
             return Binding.DoNothing;
         }
     }
+
+    public class DiagnosticStatusToColorConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is AppBlocker.Core.Diagnostics.DiagnosticStatus status)
+            {
+                return status switch
+                {
+                    AppBlocker.Core.Diagnostics.DiagnosticStatus.Passed => Application.Current.Resources["SuccessBrush"],
+                    AppBlocker.Core.Diagnostics.DiagnosticStatus.Warning => Application.Current.Resources["WarningBrush"],
+                    AppBlocker.Core.Diagnostics.DiagnosticStatus.Failed => Application.Current.Resources["DangerBrush"],
+                    _ => Application.Current.Resources["TextMutedBrush"]
+                };
+            }
+            return Application.Current.Resources["TextMutedBrush"];
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
+    }
+
+    public class DiagnosticStatusToBackgroundConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is AppBlocker.Core.Diagnostics.DiagnosticStatus status)
+            {
+                return status switch
+                {
+                    AppBlocker.Core.Diagnostics.DiagnosticStatus.Passed => new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(30, 16, 185, 129)),
+                    AppBlocker.Core.Diagnostics.DiagnosticStatus.Warning => new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(35, 245, 158, 11)),
+                    AppBlocker.Core.Diagnostics.DiagnosticStatus.Failed => new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(40, 239, 68, 68)),
+                    _ => new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(20, 255, 255, 255))
+                };
+            }
+            return new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Transparent);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
+    }
+
+    public class DiagnosticStatusToIconConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is AppBlocker.Core.Diagnostics.DiagnosticStatus status)
+            {
+                return status switch
+                {
+                    AppBlocker.Core.Diagnostics.DiagnosticStatus.Passed => "✅",
+                    AppBlocker.Core.Diagnostics.DiagnosticStatus.Warning => "⚠️",
+                    AppBlocker.Core.Diagnostics.DiagnosticStatus.Failed => "❌",
+                    AppBlocker.Core.Diagnostics.DiagnosticStatus.Checking => "⏳",
+                    _ => "❓"
+                };
+            }
+            return "❓";
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => throw new NotImplementedException();
+    }
 }
