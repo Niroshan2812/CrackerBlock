@@ -570,10 +570,12 @@ namespace AppBlocker.Service
                         return IpcResponse.Error(request.Id, "Invalid App Rule payload.");
                     }
 
+                    string procName = "Application";
                     await using var db = AppBlockerDbContext.CreateContext();
                     var rule = await db.AppRules.FindAsync(ruleDto.RuleId);
                     if (rule != null)
                     {
+                        procName = rule.ProcessName;
                         db.AppRules.Remove(rule);
                         db.Logs.Add(new SystemLog
                         {
@@ -582,13 +584,12 @@ namespace AppBlocker.Service
                             Description = $"App Rule deleted: {rule.ProcessName} (ID: {rule.Id})"
                         });
                         await db.SaveChangesAsync();
-
-                        // Hot-reload rules cache in AppLockingEngine
-                        await _appLockingEngine.LoadRulesAsync();
-
-                        return IpcResponse.Ok(request.Id, $"App rule '{rule.ProcessName}' removed.");
                     }
-                    return IpcResponse.Error(request.Id, $"App rule ID {ruleDto.RuleId} not found.");
+
+                    // Hot-reload rules cache in AppLockingEngine unconditionally
+                    await _appLockingEngine.LoadRulesAsync();
+
+                    return IpcResponse.Ok(request.Id, $"App rule '{procName}' removed and engine reloaded.");
                 }
 
                 case IpcConstants.Commands.AddWebRule:
@@ -649,10 +650,12 @@ namespace AppBlocker.Service
                         return IpcResponse.Error(request.Id, "Invalid Web Rule payload.");
                     }
 
+                    string domainName = "Domain";
                     await using var db = AppBlockerDbContext.CreateContext();
                     var rule = await db.WebRules.FindAsync(ruleDto.RuleId);
                     if (rule != null)
                     {
+                        domainName = rule.UrlOrKeyword;
                         db.WebRules.Remove(rule);
                         db.Logs.Add(new SystemLog
                         {
@@ -661,13 +664,19 @@ namespace AppBlocker.Service
                             Description = $"Web Rule deleted: {rule.UrlOrKeyword} (ID: {rule.Id})"
                         });
                         await db.SaveChangesAsync();
-
-                        // Apply updated rules to proxy engine immediately
-                        await _httpsProxyEngine.LoadRulesFromDatabaseAsync();
-
-                        return IpcResponse.Ok(request.Id, $"Web rule '{rule.UrlOrKeyword}' removed.");
                     }
-                    return IpcResponse.Error(request.Id, $"Web rule ID {ruleDto.RuleId} not found.");
+
+                    // Apply updated rules to proxy engine immediately and unconditionally
+                    await _httpsProxyEngine.LoadRulesFromDatabaseAsync();
+
+                    // Also clear any legacy hosts file managed entries
+                    try
+                    {
+                        await _webFilteringEngine.ClearManagedEntriesAsync();
+                    }
+                    catch { }
+
+                    return IpcResponse.Ok(request.Id, $"Web rule '{domainName}' removed and proxy reloaded.");
                 }
 
                 case IpcConstants.Commands.SetTaskManagerState:

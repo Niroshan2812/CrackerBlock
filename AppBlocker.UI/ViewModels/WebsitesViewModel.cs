@@ -260,6 +260,7 @@ namespace AppBlocker.UI.ViewModels
 
                     // Send IPC update
                     await _ipcClient.RemoveWebRuleAsync(item.Id);
+                    await _ipcClient.ReloadRulesAsync();
 
                     SetStatus($"Domain '{item.UrlOrKeyword}' unblocked.", true);
                     await LoadRulesAsync();

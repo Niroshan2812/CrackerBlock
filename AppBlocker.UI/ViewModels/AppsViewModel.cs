@@ -294,6 +294,7 @@ namespace AppBlocker.UI.ViewModels
 
                     // Send IPC notification
                     await _ipcClient.RemoveAppRuleAsync(item.Id);
+                    await _ipcClient.ReloadRulesAsync();
 
                     SetStatus($"Rule for '{item.ProcessName}' removed.", true);
                     await LoadRulesAsync();
