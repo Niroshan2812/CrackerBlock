@@ -307,6 +307,19 @@
                                 </StackPanel>
                             </Border>
 
+                            <!-- Start Protection Button (Visible when Service is Disconnected) -->
+                            <Button Command="{Binding StartServiceCommand}"
+                                    Style="{StaticResource ModernPrimaryButton}"
+                                    Height="32" Margin="0,0,0,10"
+                                    ToolTip="{loc:Loc Tip_StartEngine}"
+                                    Visibility="{Binding IsServiceConnected, Converter={StaticResource InverseBoolToVisConverter}}">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <TextBlock Text="🚀 " FontSize="12" />
+                                    <TextBlock Text="{loc:Loc Btn_StartService}" FontSize="11" FontWeight="SemiBold"
+                                               Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBoolToVisConverter}}" />
+                                </StackPanel>
+                            </Button>
+
                             <!-- Lock Dashboard Button -->
                             <Button Command="{Binding LockCommand}" Style="{StaticResource ModernSecondaryButton}" Height="34" FontSize="12"
                                     ToolTip="{loc:Loc Nav_LockDashboard}">

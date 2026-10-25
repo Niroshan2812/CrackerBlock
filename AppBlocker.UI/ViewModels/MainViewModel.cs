@@ -99,7 +99,25 @@ namespace AppBlocker.UI.ViewModels
         public async Task InitializeAsync()
         {
             await CheckServiceStatusAsync();
+
+            // Seamless 1-Click Auto-Start:
+            // If background service is not running, prompt once to automatically install/start so end-users don't have to touch scripts
+            if (!IsServiceConnected && !ServiceInstallerHelper.IsServiceRunning())
+            {
+                ServiceInstallerHelper.EnsureServiceStartedElevated();
+                await Task.Delay(1200);
+                await CheckServiceStatusAsync();
+            }
+
             await LockScreenVM.InitializeAsync();
+        }
+
+        [RelayCommand]
+        public async Task StartServiceAsync()
+        {
+            ServiceInstallerHelper.EnsureServiceStartedElevated();
+            await Task.Delay(1200);
+            await CheckServiceStatusAsync();
         }
 
         private async void OnAuthenticated()

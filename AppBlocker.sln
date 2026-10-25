@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
@@ -12,6 +12,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppBlocker.Tests", "AppBlocker.Tests\AppBlocker.Tests.csproj", "{352B20EC-B636-4117-A14C-D1FD931D32D0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppBlocker.Watchdog", "AppBlocker.Watchdog\AppBlocker.Watchdog.csproj", "{F7059D05-1262-418C-8939-966F32631FEC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrackerBlock.Launcher", "CrackerBlock.Launcher\CrackerBlock.Launcher.csproj", "{A87B11F2-2026-47D8-9C21-850C77D59A1B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,5 +44,9 @@ Global
 		{F7059D05-1262-418C-8939-966F32631FEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F7059D05-1262-418C-8939-966F32631FEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F7059D05-1262-418C-8939-966F32631FEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A87B11F2-2026-47D8-9C21-850C77D59A1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A87B11F2-2026-47D8-9C21-850C77D59A1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A87B11F2-2026-47D8-9C21-850C77D59A1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A87B11F2-2026-47D8-9C21-850C77D59A1B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

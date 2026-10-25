@@ -19,6 +19,7 @@ TestResults/
 *.trx
 *.coverage
 *.coveragexml
+Release_v1.0/
 
 ## SQLite temporary and database files
 *.db
