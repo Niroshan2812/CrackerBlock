@@ -42,6 +42,26 @@ namespace AppBlocker.UI.ViewModels
             SidebarWidth = IsSidebarCollapsed ? 68 : 260;
         }
 
+        public LocalizationManager Loc => LocalizationManager.Instance;
+
+        [RelayCommand]
+        public void ToggleLanguage()
+        {
+            LocalizationManager.Instance.ToggleLanguage();
+        }
+
+        [RelayCommand]
+        public void SetLanguageEnglish()
+        {
+            LocalizationManager.Instance.SetLanguage(AppLanguage.English);
+        }
+
+        [RelayCommand]
+        public void SetLanguageSinhala()
+        {
+            LocalizationManager.Instance.SetLanguage(AppLanguage.Sinhala);
+        }
+
         public IPinSecurityService PinService => _pinService;
         public IpcClientService IpcClient => _ipcClient;
 
@@ -63,6 +83,9 @@ namespace AppBlocker.UI.ViewModels
             SchedulesVM = new SchedulesViewModel(_ipcClient);
             LogsVM = new LogsViewModel();
             SettingsVM = new SettingsViewModel(_ipcClient, _pinService, Lock);
+
+            // Listen to language changes to update localized dynamic status badges
+            LocalizationManager.Instance.LanguageChanged += _ => UpdateServiceStatusBadge();
 
             // Heartbeat to check if AppBlocker.Service daemon is online
             _heartbeatTimer = new DispatcherTimer
@@ -180,20 +203,30 @@ namespace AppBlocker.UI.ViewModels
                 {
                     IsServiceConnected = true;
                     IsBlockingPaused = status.IsBlockingPaused;
-                    ServiceStatusBadge = IsBlockingPaused 
-                        ? "Protection Paused (Background Daemon Active)" 
-                        : "Background Daemon Active (LocalSystem)";
                 }
                 else
                 {
                     IsServiceConnected = false;
-                    ServiceStatusBadge = "Daemon Offline (Start AppBlocker.Service)";
                 }
             }
             catch
             {
                 IsServiceConnected = false;
-                ServiceStatusBadge = "Daemon Offline";
+            }
+            UpdateServiceStatusBadge();
+        }
+
+        private void UpdateServiceStatusBadge()
+        {
+            if (IsServiceConnected)
+            {
+                ServiceStatusBadge = IsBlockingPaused 
+                    ? (LocalizationManager.Instance.IsSinhala ? "ආරක්ෂණය තාවකාලිකව නවතා ඇත" : "Protection Paused (Daemon Active)")
+                    : LocalizationManager.Instance.Get("Status_ServiceActive");
+            }
+            else
+            {
+                ServiceStatusBadge = LocalizationManager.Instance.Get("Status_ServiceOffline");
             }
         }
     }

@@ -3,6 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:loc="clr-namespace:AppBlocker.UI.Services"
+             FontFamily="Segoe UI, Nirmala UI, Iskoola Pota, sans-serif"
              mc:Ignorable="d" 
              d:DesignHeight="1100" d:DesignWidth="1000">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -15,23 +17,23 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="Productivity &amp; Distraction Analytics" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
-                    <TextBlock Text="Live distraction telemetry, time saved, top intercepted apps/domains, and forensic audit trail." FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
+                    <TextBlock Text="{loc:Loc Logs_Title}" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
+                    <TextBlock Text="{loc:Loc Logs_Subtitle}" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
                 </StackPanel>
 
                 <!-- Time Range Filter Chips -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Content="Today"
+                    <Button Content="{loc:Loc Logs_RangeToday}"
                             Command="{Binding SelectTimeRangeCommand}"
                             CommandParameter="Today"
                             Style="{StaticResource ModernSecondaryButton}"
                             Height="34" Margin="0,0,8,0" Padding="12,4" />
-                    <Button Content="Past 7 Days"
+                    <Button Content="{loc:Loc Logs_RangeWeek}"
                             Command="{Binding SelectTimeRangeCommand}"
                             CommandParameter="Week"
                             Style="{StaticResource ModernSecondaryButton}"
                             Height="34" Margin="0,0,8,0" Padding="12,4" />
-                    <Button Content="All Time"
+                    <Button Content="{loc:Loc Logs_RangeAllTime}"
                             Command="{Binding SelectTimeRangeCommand}"
                             CommandParameter="AllTime"
                             Style="{StaticResource ModernPrimaryButton}"
@@ -53,7 +55,7 @@
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                             <TextBlock Text="🛡️ " FontSize="14" />
-                            <TextBlock Text="TOTAL BLOCKS" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentPurpleBrush}" />
+                            <TextBlock Text="{loc:Loc Logs_TotalBlocks}" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentPurpleBrush}" />
                         </StackPanel>
                         <TextBlock Text="{Binding TotalInterceptions}" FontSize="32" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
                         <TextBlock Text="{Binding TotalAppsBlocked, StringFormat='{}{0} apps / '}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0">
@@ -72,10 +74,10 @@
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                             <TextBlock Text="⏳ " FontSize="14" />
-                            <TextBlock Text="TIME PRESERVED" FontSize="11" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" />
+                            <TextBlock Text="{loc:Loc Logs_TimePreserved}" FontSize="11" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" />
                         </StackPanel>
                         <TextBlock Text="{Binding TimeSavedDisplay}" FontSize="32" FontWeight="Bold" Foreground="{StaticResource SuccessBrush}" />
-                        <TextBlock Text="Est. 5 mins / distraction saved" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
+                        <TextBlock Text="{loc:Loc Logs_TimePreservedDesc}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
                     </StackPanel>
                 </Border>
 
@@ -84,10 +86,10 @@
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                             <TextBlock Text="⚡ " FontSize="14" />
-                            <TextBlock Text="FOCUS SCORE" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentCyanBrush}" />
+                            <TextBlock Text="{loc:Loc Logs_FocusScore}" FontSize="11" FontWeight="Bold" Foreground="{StaticResource AccentCyanBrush}" />
                         </StackPanel>
                         <TextBlock Text="{Binding FocusScoreDisplay}" FontSize="32" FontWeight="Bold" Foreground="{StaticResource AccentCyanBrush}" />
-                        <TextBlock Text="Based on sprints &amp; policy adherence" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
+                        <TextBlock Text="{loc:Loc Logs_FocusScoreDesc}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
                     </StackPanel>
                 </Border>
 
@@ -96,7 +98,7 @@
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                             <TextBlock Text="🔒 " FontSize="14" />
-                            <TextBlock Text="TAMPER INTERCEPTS" FontSize="11" FontWeight="Bold" Foreground="{StaticResource WarningBrush}" />
+                            <TextBlock Text="{loc:Loc Logs_TamperIntercepts}" FontSize="11" FontWeight="Bold" Foreground="{StaticResource WarningBrush}" />
                         </StackPanel>
                         <TextBlock Text="{Binding TamperAttemptsCount}" FontSize="32" FontWeight="Bold" Foreground="{StaticResource WarningBrush}" />
                         <TextBlock Text="Watchdog &amp; security barriers" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
@@ -223,19 +225,19 @@
                                  Margin="0,0,12,0" />
 
                         <Button Grid.Column="1"
-                                Content="📥 Export CSV"
+                                Content="{loc:Loc Logs_Export}"
                                 Command="{Binding ExportToCsvCommand}"
                                 Style="{StaticResource ModernSecondaryButton}"
                                 Height="36" Margin="0,0,10,0" Padding="14,6" />
 
                         <Button Grid.Column="2"
-                                Content="🔄 Refresh"
+                                Content="{loc:Loc Logs_Refresh}"
                                 Command="{Binding RefreshLogsCommand}"
                                 Style="{StaticResource ModernSecondaryButton}"
                                 Height="36" Margin="0,0,10,0" Padding="14,6" />
 
                         <Button Grid.Column="3"
-                                Content="🗑️ Clear Logs"
+                                Content="{loc:Loc Logs_Clear}"
                                 Command="{Binding ClearLogsCommand}"
                                 Style="{StaticResource ModernDangerButton}"
                                 Height="36" Padding="14,6" />
@@ -284,7 +286,7 @@
 
                     <DataGrid.Columns>
                         <!-- Timestamp -->
-                        <DataGridTextColumn Header="Timestamp (UTC)" Binding="{Binding Timestamp, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" Width="160">
+                        <DataGridTextColumn Header="{loc:Loc Logs_ColTime}" Binding="{Binding Timestamp, StringFormat='{}{0:yyyy-MM-dd HH:mm:ss}'}" Width="160">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
@@ -295,7 +297,7 @@
                         </DataGridTextColumn>
 
                         <!-- Event Type Badge -->
-                        <DataGridTemplateColumn Header="Event Category" Width="180">
+                        <DataGridTemplateColumn Header="{loc:Loc Logs_ColEvent}" Width="180">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Border CornerRadius="4" Padding="8,4" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0">
@@ -357,7 +359,7 @@
                         </DataGridTemplateColumn>
 
                         <!-- Description -->
-                        <DataGridTextColumn Header="Details &amp; Parameters" Binding="{Binding Description}" Width="*">
+                        <DataGridTextColumn Header="{loc:Loc Logs_ColDesc}" Binding="{Binding Description}" Width="*">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />

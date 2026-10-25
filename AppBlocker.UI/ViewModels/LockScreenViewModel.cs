@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using AppBlocker.Core.Security;
+using AppBlocker.UI.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -10,6 +11,14 @@ namespace AppBlocker.UI.ViewModels
     {
         private readonly IPinSecurityService _pinService;
         private readonly Action _onAuthenticated;
+
+        public LocalizationManager Loc => LocalizationManager.Instance;
+
+        [RelayCommand]
+        public void ToggleLanguage()
+        {
+            LocalizationManager.Instance.ToggleLanguage();
+        }
 
         [ObservableProperty]
         private bool _isSetupMode;

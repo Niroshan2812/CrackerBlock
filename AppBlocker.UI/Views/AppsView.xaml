@@ -3,14 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:loc="clr-namespace:AppBlocker.UI.Services"
              mc:Ignorable="d" 
+             FontFamily="Segoe UI, Nirmala UI, Iskoola Pota, sans-serif"
              d:DesignHeight="750" d:DesignWidth="950">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="24">
             <!-- Header -->
             <StackPanel Margin="0,0,0,20">
-                <TextBlock Text="Application Blocking Engine" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
-                <TextBlock Text="Block desktop software, executables, games, and background processes natively." FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
+                <TextBlock Text="{loc:Loc Apps_Title}" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
+                <TextBlock Text="{loc:Loc Apps_Subtitle}" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
             </StackPanel>
 
             <!-- Status Banner (with 30-sec Auto-Dismiss & Manual Close) -->
@@ -53,11 +55,11 @@
             <!-- Add Rule Card -->
             <Border Style="{StaticResource ModernCard}" Margin="0,0,0,24">
                 <StackPanel>
-                    <TextBlock Text="Add New Application Rule" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,16" />
+                    <TextBlock Text="{loc:Loc Apps_AddNew}" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,16" />
 
                     <!-- Quick App Selection Chips -->
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,14" VerticalAlignment="Center">
-                        <TextBlock Text="⚡ Quick Pick:" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                        <TextBlock Text="{loc:Loc Apps_PopularShortcuts}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,10,0" />
                         <Button Content="🎮 Steam" Command="{Binding SelectQuickAppCommand}" CommandParameter="steam" Style="{StaticResource ModernSecondaryButton}" Padding="8,4" Height="28" Margin="0,0,6,0" FontSize="11" />
                         <Button Content="💬 Discord" Command="{Binding SelectQuickAppCommand}" CommandParameter="discord" Style="{StaticResource ModernSecondaryButton}" Padding="8,4" Height="28" Margin="0,0,6,0" FontSize="11" />
                         <Button Content="🎵 Spotify" Command="{Binding SelectQuickAppCommand}" CommandParameter="spotify" Style="{StaticResource ModernSecondaryButton}" Padding="8,4" Height="28" Margin="0,0,6,0" FontSize="11" />
@@ -81,10 +83,10 @@
 
                         <!-- Process Name / Exe Path with watermark hint -->
                         <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,12">
-                            <TextBlock Text="Process Name (e.g. discord, steam, spotify, calc)" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                            <TextBlock Text="{loc:Loc Apps_ProcessName}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
                             <Grid>
                                 <TextBox Text="{Binding NewProcessName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38" />
-                                <TextBlock Text="Enter executable name or select below..."
+                                <TextBlock Text="{loc:Loc Apps_ProcessHint}"
                                            IsHitTestVisible="False"
                                            FontSize="12" Foreground="{StaticResource TextMutedBrush}"
                                            VerticalAlignment="Center" Margin="14,0,0,0"
@@ -94,12 +96,12 @@
 
                         <!-- Browse Exe & Running App Pickers -->
                         <StackPanel Grid.Row="0" Grid.Column="1" VerticalAlignment="Bottom" Orientation="Horizontal" Margin="0,0,12,12">
-                            <Button Content="📁 Browse .exe" Command="{Binding BrowseExeCommand}" Style="{StaticResource ModernSecondaryButton}" Height="38" Margin="0,0,6,0" ToolTip="Browse your computer for an executable file" />
+                            <Button Content="{loc:Loc Apps_BrowseExe}" Command="{Binding BrowseExeCommand}" Style="{StaticResource ModernSecondaryButton}" Height="38" Margin="0,0,6,0" ToolTip="Browse your computer for an executable file" />
                             <ComboBox ItemsSource="{Binding RunningProcesses}"
                                       SelectedItem="{Binding NewProcessName, Mode=TwoWay}"
                                       Style="{StaticResource ModernComboBox}"
                                       Height="38" Width="140"
-                                      ToolTip="Pick an application currently running right now">
+                                      ToolTip="{loc:Loc Apps_PickRunning}">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate>
                                         <TextBlock Text="{Binding StringFormat='⚡ {0}'}" FontSize="12" />
@@ -110,13 +112,13 @@
 
                         <!-- Schedule Selector -->
                         <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,12,12">
-                            <TextBlock Text="Enforcement Schedule" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                            <TextBlock Text="{loc:Loc Apps_Schedule}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
                             <ComboBox ItemsSource="{Binding ScheduleOptions}" SelectedItem="{Binding SelectedSchedule}" Style="{StaticResource ModernComboBox}" Height="38" />
                         </StackPanel>
 
                         <!-- Add Rule Button -->
                         <StackPanel Grid.Row="0" Grid.Column="3" VerticalAlignment="Bottom" Margin="0,0,0,12">
-                            <Button Content="➕ Block Application" Command="{Binding AddRuleCommand}" Style="{StaticResource ModernPrimaryButton}" Height="38" />
+                            <Button Content="{loc:Loc Apps_BtnAdd}" Command="{Binding AddRuleCommand}" Style="{StaticResource ModernPrimaryButton}" Height="38" />
                         </StackPanel>
 
                         <!-- Full Path Info Preview if selected -->
@@ -132,7 +134,7 @@
             <Border Style="{StaticResource ModernCard}">
                 <StackPanel>
                     <Grid Margin="0,0,0,16">
-                        <TextBlock Text="Managed Restricted Applications" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                        <TextBlock Text="{loc:Loc Apps_ManagedRules}" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
                         <TextBlock Text="{Binding Rules.Count, StringFormat='Total Rules: {0}'}" FontSize="12" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Right" VerticalAlignment="Center" />
                     </Grid>
 
@@ -231,7 +233,7 @@
 
                                         <!-- Delete Button -->
                                         <Button Grid.Column="4"
-                                                Content="🗑️ Delete"
+                                                Content="{loc:Loc Apps_Delete}"
                                                 Command="{Binding DataContext.RemoveRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                 CommandParameter="{Binding}"
                                                 Style="{StaticResource ModernDangerButton}"
@@ -243,7 +245,7 @@
                     </ItemsControl>
 
                     <!-- Empty state text: now hides when Rules.Count > 0 -->
-                    <TextBlock Text="No application rules configured yet. Add an executable above to start locking."
+                    <TextBlock Text="{loc:Loc Apps_NoRules}"
                                Foreground="{StaticResource TextMutedBrush}" FontSize="13" TextAlignment="Center" Margin="0,20,0,10"
                                Visibility="{Binding Rules.Count, Converter={StaticResource InverseBoolToVisConverter}}" />
                 </StackPanel>

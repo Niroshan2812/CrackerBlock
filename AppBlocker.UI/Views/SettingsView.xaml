@@ -3,14 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:loc="clr-namespace:AppBlocker.UI.Services"
+             FontFamily="Segoe UI, Nirmala UI, Iskoola Pota, sans-serif"
              mc:Ignorable="d" 
              d:DesignHeight="850" d:DesignWidth="900">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="24">
             <!-- Header -->
             <StackPanel Margin="0,0,0,20">
-                <TextBlock Text="Settings &amp; Tamper Defense" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
-                <TextBlock Text="Manage background service daemon, anti-tamper policies, and Master PIN credentials." FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
+                <TextBlock Text="{loc:Loc Settings_Title}" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
+                <TextBlock Text="{loc:Loc Settings_Subtitle}" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
             </StackPanel>
 
             <!-- Status Banner (with 30-sec Auto-Dismiss & Manual Close) -->
@@ -43,7 +45,7 @@
                         <StackPanel VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                                 <TextBlock Text="🩺 " FontSize="18" VerticalAlignment="Center" />
-                                <TextBlock Text="System Diagnostics &amp; Self-Healing Wizard" FontSize="17" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                <TextBlock Text="{loc:Loc Diag_Title}" FontSize="17" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
                                 
                                 <!-- Health Score Badge -->
                                 <Border Margin="14,0,0,0" CornerRadius="12" Padding="10,3" VerticalAlignment="Center"
@@ -56,13 +58,13 @@
 
                         <!-- Action Buttons -->
                         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                            <Button Content="🔍 Run Health Check"
+                            <Button Content="{loc:Loc Diag_RunBtn}"
                                     Command="{Binding RunDiagnosticsCommand}"
                                     IsEnabled="{Binding IsDiagnosticsRunning, Converter={StaticResource InverseBoolConverter}}"
                                     Style="{StaticResource ModernSecondaryButton}"
                                     Height="38" Padding="14,6" Margin="0,0,10,0" />
 
-                            <Button Content="🔧 Auto-Repair All Issues"
+                            <Button Content="{loc:Loc Diag_AutoRepairBtn}"
                                     Command="{Binding AutoRepairAllCommand}"
                                     IsEnabled="{Binding IsDiagnosticsRunning, Converter={StaticResource InverseBoolConverter}}"
                                     Style="{StaticResource ModernPrimaryButton}"
@@ -153,7 +155,7 @@
                         <StackPanel VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                                 <TextBlock Text="👶🛡️ " FontSize="18" VerticalAlignment="Center" />
-                                <TextBlock Text="Safe Child Mode (Parental Protection Shield)" FontSize="17" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                <TextBlock Text="{loc:Loc SafeChild_Title}" FontSize="17" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
                             </StackPanel>
                             <TextBlock Text="{Binding SafeChildStatusText}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" />
                         </StackPanel>
@@ -165,11 +167,11 @@
                                 Height="42" Padding="18,8">
                             <Button.Style>
                                 <Style TargetType="Button" BasedOn="{StaticResource ModernPrimaryButton}">
-                                    <Setter Property="Content" Value="👶 Enable Child Shield" />
+                                    <Setter Property="Content" Value="{loc:Loc SafeChild_Enable}" />
                                     <Setter Property="Background" Value="{StaticResource AccentPurpleBrush}" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsSafeChildModeEnabled}" Value="True">
-                                            <Setter Property="Content" Value="🛡️ SHIELD ACTIVE (Click to Unlock)" />
+                                            <Setter Property="Content" Value="{loc:Loc SafeChild_Active}" />
                                             <Setter Property="Background" Value="{StaticResource SuccessBrush}" />
                                         </DataTrigger>
                                     </Style.Triggers>
@@ -189,8 +191,8 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="🔞 Block Adult Websites &amp; Online Gambling" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
-                                    <TextBlock Text="Restricts adult entertainment sites, NSFW forums, sexually explicit content, and gambling/betting platforms." FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
+                                    <TextBlock Text="{loc:Loc SafeChild_Adult}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <TextBlock Text="{loc:Loc SafeChild_AdultDesc}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
                                 </StackPanel>
 
                                 <CheckBox Grid.Column="1"
@@ -210,8 +212,8 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="📱 Restrict Social Media Browsing" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
-                                    <TextBlock Text="Blocks distracting social feeds including TikTok, Instagram, Facebook, Snapchat, Reddit, and Twitter/X." FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
+                                    <TextBlock Text="{loc:Loc SafeChild_Social}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <TextBlock Text="{loc:Loc SafeChild_SocialDesc}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
                                 </StackPanel>
 
                                 <CheckBox Grid.Column="1"
@@ -231,8 +233,8 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="🎮 Block Addictive Games &amp; Launchers" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
-                                    <TextBlock Text="Automatically terminates Roblox, Steam, Epic Games, Valorant, Riot Client, Minecraft, and blocks web games (Poki, CrazyGames)." FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
+                                    <TextBlock Text="{loc:Loc SafeChild_Gaming}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <TextBlock Text="{loc:Loc SafeChild_GamingDesc}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
                                 </StackPanel>
 
                                 <CheckBox Grid.Column="1"
@@ -252,8 +254,8 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="🔍 Enforce Strict Search Engine SafeSearch" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
-                                    <TextBlock Text="Forces family-safe strict filtering on Google, Bing, YouTube, and DuckDuckGo search queries." FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
+                                    <TextBlock Text="{loc:Loc SafeChild_SafeSearch}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <TextBlock Text="{loc:Loc SafeChild_SafeSearchDesc}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
                                 </StackPanel>
 
                                 <CheckBox Grid.Column="1"
@@ -273,8 +275,8 @@
                                 </Grid.ColumnDefinitions>
 
                                 <StackPanel VerticalAlignment="Center">
-                                    <TextBlock Text="🛡️ Block VPNs, Tor &amp; Web Unblockers" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
-                                    <TextBlock Text="Terminates VPN clients (ProtonVPN, NordVPN, Windscribe, WireGuard, Tor) and blocks proxy unblocker websites." FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
+                                    <TextBlock Text="{loc:Loc SafeChild_Vpn}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <TextBlock Text="{loc:Loc SafeChild_VpnDesc}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
                                 </StackPanel>
 
                                 <CheckBox Grid.Column="1"
@@ -291,7 +293,7 @@
             <!-- Background Daemon Status Card -->
             <Border Style="{StaticResource ModernCard}" Margin="0,0,0,20">
                 <StackPanel>
-                    <TextBlock Text="Background Worker Service Daemon" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,12" />
+                    <TextBlock Text="{loc:Loc Settings_DaemonTitle}" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,12" />
 
                     <Grid Margin="0,0,0,16">
                         <Grid.ColumnDefinitions>
@@ -670,7 +672,7 @@
             <!-- Master PIN Management Card -->
             <Border Style="{StaticResource ModernCard}" Margin="0,0,0,20">
                 <StackPanel>
-                    <TextBlock Text="Master PIN Management" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,12" />
+                    <TextBlock Text="{loc:Loc Settings_PinTitle}" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,12" />
 
                     <!-- Status Notification -->
                     <Border CornerRadius="6" Padding="10,8" Margin="0,0,0,12"
@@ -712,25 +714,86 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,12,12">
-                            <TextBlock Text="Current PIN" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                            <TextBlock Text="{loc:Loc Settings_PinCurrent}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
                             <TextBox Text="{Binding CurrentPinInput, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38" />
                         </StackPanel>
 
                         <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,12,12">
-                            <TextBlock Text="New PIN" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                            <TextBlock Text="{loc:Loc Settings_PinNew}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
                             <TextBox Text="{Binding NewPinInput, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38" />
                         </StackPanel>
 
                         <StackPanel Grid.Row="0" Grid.Column="2" Margin="0,0,12,12">
-                            <TextBlock Text="Confirm New PIN" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                            <TextBlock Text="{loc:Loc Settings_PinConfirm}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
                             <TextBox Text="{Binding ConfirmPinInput, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38" />
                         </StackPanel>
 
                         <StackPanel Grid.Row="0" Grid.Column="3" VerticalAlignment="Bottom" Margin="0,0,0,12">
-                            <Button Content="Update PIN" Command="{Binding ChangePinCommand}" Style="{StaticResource ModernPrimaryButton}" Height="38" />
+                            <Button Content="{loc:Loc Settings_PinUpdateBtn}" Command="{Binding ChangePinCommand}" Style="{StaticResource ModernPrimaryButton}" Height="38" />
                         </StackPanel>
                     </Grid>
                 </StackPanel>
+            </Border>
+
+            <!-- 🌐 Language Preference Card (භාෂාව තේරීම) -->
+            <Border Style="{StaticResource ModernCard}" Margin="0,0,0,20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <TextBlock Text="🌐 " FontSize="18" VerticalAlignment="Center" />
+                            <TextBlock Text="{loc:Loc Settings_LanguageTitle}" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="{loc:Loc Settings_LanguageDesc}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
+                    </StackPanel>
+
+                    <!-- Language Switcher Buttons -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button Command="{Binding SetLanguageEnglishCommand}"
+                                Height="38" Padding="14,6" Margin="0,0,10,0">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource ModernSecondaryButton}">
+                                    <Setter Property="BorderBrush" Value="{StaticResource BorderCardBrush}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Loc.IsEnglish}" Value="True">
+                                            <Setter Property="BorderBrush" Value="{StaticResource AccentPurpleBrush}" />
+                                            <Setter Property="Background" Value="#2A1B4E" />
+                                            <Setter Property="Foreground" Value="#FFFFFF" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🇺🇸 " FontSize="14" VerticalAlignment="Center" />
+                                <TextBlock Text="English" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Command="{Binding SetLanguageSinhalaCommand}"
+                                Height="38" Padding="14,6">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource ModernSecondaryButton}">
+                                    <Setter Property="BorderBrush" Value="{StaticResource BorderCardBrush}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Loc.IsSinhala}" Value="True">
+                                            <Setter Property="BorderBrush" Value="{StaticResource AccentPurpleBrush}" />
+                                            <Setter Property="Background" Value="#2A1B4E" />
+                                            <Setter Property="Foreground" Value="#FFFFFF" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🇱🇰 " FontSize="14" VerticalAlignment="Center" />
+                                <TextBlock Text="සිංහල" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
             </Border>
 
             <!-- Lock Dashboard Action -->
@@ -742,12 +805,12 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel>
-                        <TextBlock Text="Lock Session" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
-                        <TextBlock Text="Return to the authentication gate to prevent unauthorized configuration changes." FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
+                        <TextBlock Text="{loc:Loc Settings_LockTitle}" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" />
+                        <TextBlock Text="{loc:Loc Settings_LockDesc}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
                     </StackPanel>
 
                     <Button Grid.Column="1"
-                            Content="🔒 Lock Dashboard"
+                            Content="{loc:Loc Settings_LockBtn}"
                             Command="{Binding LockDashboardCommand}"
                             Style="{StaticResource ModernSecondaryButton}"
                             Height="38" />

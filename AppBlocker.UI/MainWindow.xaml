@@ -5,10 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:AppBlocker.UI.ViewModels"
         xmlns:views="clr-namespace:AppBlocker.UI.Views"
+        xmlns:loc="clr-namespace:AppBlocker.UI.Services"
         mc:Ignorable="d"
         Title="AppBlocker - Windows App &amp; Web Guardian"
         Height="780" Width="1180"
         MinHeight="680" MinWidth="980"
+        FontFamily="Segoe UI, Nirmala UI, Iskoola Pota, sans-serif"
         WindowStartupLocation="CenterScreen"
         Background="{StaticResource BgMainBrush}"
         Foreground="{StaticResource TextPrimaryBrush}">
@@ -51,30 +53,44 @@
                                     <TextBlock Text="🛡️" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                 </Border>
                                 <StackPanel VerticalAlignment="Center" Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBoolToVisConverter}}">
-                                    <TextBlock Text="APPBLOCKER" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
-                                    <TextBlock Text="Desktop &amp; Web Control" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
+                                    <TextBlock Text="{loc:Loc Brand_Title}" FontSize="15" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
+                                    <TextBlock Text="{loc:Loc Brand_Subtitle}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" />
                                 </StackPanel>
                             </StackPanel>
 
-                            <!-- Collapse / Expand Toggle Button -->
-                            <Button Grid.Column="1" Command="{Binding ToggleSidebarCommand}"
-                                    Style="{StaticResource ModernSecondaryButton}"
-                                    Padding="0" Height="28" Width="28"
-                                    VerticalAlignment="Center"
-                                    ToolTip="Toggle Sidebar (Expand / Collapse)">
-                                <TextBlock FontSize="10">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="◀" />
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsSidebarCollapsed}" Value="True">
-                                                    <Setter Property="Text" Value="▶" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </Button>
+                            <!-- Language Selector Pill & Collapse / Expand Toggle Button -->
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Button Command="{Binding ToggleLanguageCommand}"
+                                        Style="{StaticResource ModernSecondaryButton}"
+                                        Padding="6,2" Height="28" Margin="0,0,5,0"
+                                        VerticalAlignment="Center"
+                                        ToolTip="{Binding Loc.SwitchLanguageTooltip}">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="🌐 " FontSize="11" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding Loc.CurrentLanguageDisplay}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center"
+                                                   Visibility="{Binding IsSidebarCollapsed, Converter={StaticResource InverseBoolToVisConverter}}" />
+                                    </StackPanel>
+                                </Button>
+
+                                <Button Command="{Binding ToggleSidebarCommand}"
+                                        Style="{StaticResource ModernSecondaryButton}"
+                                        Padding="0" Height="28" Width="28"
+                                        VerticalAlignment="Center"
+                                        ToolTip="{loc:Loc Tip_ToggleSidebar}">
+                                    <TextBlock FontSize="10">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="◀" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsSidebarCollapsed}" Value="True">
+                                                        <Setter Property="Text" Value="▶" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                </Button>
+                            </StackPanel>
                         </Grid>
                     </Border>
 
@@ -84,7 +100,7 @@
                         <RadioButton GroupName="NavTabs"
                                      IsChecked="{Binding SelectedTabIndex, Converter={StaticResource EqualityToBoolConverter}, ConverterParameter=0, Mode=TwoWay}"
                                      Click="NavButton_Click" Tag="0" Margin="0,0,0,6"
-                                     ToolTip="Applications Engine">
+                                     ToolTip="{loc:Loc Nav_Applications}">
                             <RadioButton.Style>
                                 <Style TargetType="RadioButton">
                                     <Setter Property="Template">
@@ -93,7 +109,7 @@
                                                 <Border x:Name="btnBorder" Background="Transparent" CornerRadius="8" Padding="12,10" Cursor="Hand">
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                                         <TextBlock Text="💻" FontSize="16" Width="24" TextAlignment="Center" />
-                                                        <TextBlock Text="Applications" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" x:Name="txtLabel" Margin="10,0,0,0"
+                                                        <TextBlock Text="{loc:Loc Nav_Applications}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" x:Name="txtLabel" Margin="10,0,0,0"
                                                                    Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBoolToVisConverter}}" />
                                                     </StackPanel>
                                                 </Border>
@@ -117,7 +133,7 @@
                         <RadioButton GroupName="NavTabs"
                                      IsChecked="{Binding SelectedTabIndex, Converter={StaticResource EqualityToBoolConverter}, ConverterParameter=1, Mode=TwoWay}"
                                      Click="NavButton_Click" Tag="1" Margin="0,0,0,6"
-                                     ToolTip="Web Filtering Engine">
+                                     ToolTip="{loc:Loc Nav_Websites}">
                             <RadioButton.Style>
                                 <Style TargetType="RadioButton">
                                     <Setter Property="Template">
@@ -126,7 +142,7 @@
                                                 <Border x:Name="btnBorder" Background="Transparent" CornerRadius="8" Padding="12,10" Cursor="Hand">
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                                         <TextBlock Text="🌐" FontSize="16" Width="24" TextAlignment="Center" />
-                                                        <TextBlock Text="Websites" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" x:Name="txtLabel" Margin="10,0,0,0"
+                                                        <TextBlock Text="{loc:Loc Nav_Websites}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" x:Name="txtLabel" Margin="10,0,0,0"
                                                                    Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBoolToVisConverter}}" />
                                                     </StackPanel>
                                                 </Border>
@@ -150,7 +166,7 @@
                         <RadioButton GroupName="NavTabs"
                                      IsChecked="{Binding SelectedTabIndex, Converter={StaticResource EqualityToBoolConverter}, ConverterParameter=2, Mode=TwoWay}"
                                      Click="NavButton_Click" Tag="2" Margin="0,0,0,6"
-                                     ToolTip="Schedules &amp; Focus Timer">
+                                     ToolTip="{loc:Loc Nav_Schedules}">
                             <RadioButton.Style>
                                 <Style TargetType="RadioButton">
                                     <Setter Property="Template">
@@ -159,7 +175,7 @@
                                                 <Border x:Name="btnBorder" Background="Transparent" CornerRadius="8" Padding="12,10" Cursor="Hand">
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                                         <TextBlock Text="⏱️" FontSize="16" Width="24" TextAlignment="Center" />
-                                                        <TextBlock Text="Schedules" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" x:Name="txtLabel" Margin="10,0,0,0"
+                                                        <TextBlock Text="{loc:Loc Nav_Schedules}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" x:Name="txtLabel" Margin="10,0,0,0"
                                                                    Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBoolToVisConverter}}" />
                                                     </StackPanel>
                                                 </Border>
@@ -183,7 +199,7 @@
                         <RadioButton GroupName="NavTabs"
                                      IsChecked="{Binding SelectedTabIndex, Converter={StaticResource EqualityToBoolConverter}, ConverterParameter=3, Mode=TwoWay}"
                                      Click="NavButton_Click" Tag="3" Margin="0,0,0,6"
-                                     ToolTip="Analytics &amp; Audit Logs">
+                                     ToolTip="{loc:Loc Nav_Logs}">
                             <RadioButton.Style>
                                 <Style TargetType="RadioButton">
                                     <Setter Property="Template">
@@ -192,7 +208,7 @@
                                                 <Border x:Name="btnBorder" Background="Transparent" CornerRadius="8" Padding="12,10" Cursor="Hand">
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                                         <TextBlock Text="📊" FontSize="16" Width="24" TextAlignment="Center" />
-                                                        <TextBlock Text="Analytics &amp; Logs" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" x:Name="txtLabel" Margin="10,0,0,0"
+                                                        <TextBlock Text="{loc:Loc Nav_Logs}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" x:Name="txtLabel" Margin="10,0,0,0"
                                                                    Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBoolToVisConverter}}" />
                                                     </StackPanel>
                                                 </Border>
@@ -216,7 +232,7 @@
                         <RadioButton GroupName="NavTabs"
                                      IsChecked="{Binding SelectedTabIndex, Converter={StaticResource EqualityToBoolConverter}, ConverterParameter=4, Mode=TwoWay}"
                                      Click="NavButton_Click" Tag="4" Margin="0,0,0,6"
-                                     ToolTip="Settings &amp; Defense">
+                                     ToolTip="{loc:Loc Nav_Settings}">
                             <RadioButton.Style>
                                 <Style TargetType="RadioButton">
                                     <Setter Property="Template">
@@ -225,7 +241,7 @@
                                                 <Border x:Name="btnBorder" Background="Transparent" CornerRadius="8" Padding="12,10" Cursor="Hand">
                                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                                         <TextBlock Text="⚙️" FontSize="16" Width="24" TextAlignment="Center" />
-                                                        <TextBlock Text="Settings &amp; Defense" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" x:Name="txtLabel" Margin="10,0,0,0"
+                                                        <TextBlock Text="{loc:Loc Nav_Settings}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" x:Name="txtLabel" Margin="10,0,0,0"
                                                                    Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBoolToVisConverter}}" />
                                                     </StackPanel>
                                                 </Border>
@@ -293,10 +309,10 @@
 
                             <!-- Lock Dashboard Button -->
                             <Button Command="{Binding LockCommand}" Style="{StaticResource ModernSecondaryButton}" Height="34" FontSize="12"
-                                    ToolTip="Lock Dashboard with Master PIN">
+                                    ToolTip="{loc:Loc Nav_LockDashboard}">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <TextBlock Text="🔒" FontSize="13" />
-                                    <TextBlock Text=" Lock Dashboard" FontSize="12"
+                                    <TextBlock Text="🔒 " FontSize="13" />
+                                    <TextBlock Text="{loc:Loc Nav_LockDashboard}" FontSize="12"
                                                Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBoolToVisConverter}}" />
                                 </StackPanel>
                             </Button>

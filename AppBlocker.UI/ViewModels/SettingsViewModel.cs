@@ -18,6 +18,26 @@ namespace AppBlocker.UI.ViewModels
         private readonly Action _onLockDashboard;
         private CancellationTokenSource? _generalStatusCts;
 
+        public LocalizationManager Loc => LocalizationManager.Instance;
+
+        [RelayCommand]
+        public void ToggleLanguage()
+        {
+            LocalizationManager.Instance.ToggleLanguage();
+        }
+
+        [RelayCommand]
+        public void SetLanguageEnglish()
+        {
+            LocalizationManager.Instance.SetLanguage(AppLanguage.English);
+        }
+
+        [RelayCommand]
+        public void SetLanguageSinhala()
+        {
+            LocalizationManager.Instance.SetLanguage(AppLanguage.Sinhala);
+        }
+
         [ObservableProperty]
         private bool _isServiceConnected;
 

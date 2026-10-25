@@ -3,14 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:loc="clr-namespace:AppBlocker.UI.Services"
+             FontFamily="Segoe UI, Nirmala UI, Iskoola Pota, sans-serif"
              mc:Ignorable="d" 
              d:DesignHeight="1000" d:DesignWidth="950">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="24">
             <!-- Header -->
             <StackPanel Margin="0,0,0,24">
-                <TextBlock Text="Enforcement Schedules &amp; Pomodoro Focus Timer" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
-                <TextBlock Text="Harness structured high-intensity focus sprints with Strict Nuclear Lock, or automate recurring time windows." FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
+                <TextBlock Text="{loc:Loc Sched_Title}" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
+                <TextBlock Text="{loc:Loc Sched_Subtitle}" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
             </StackPanel>
 
             <!-- 1. Hero Card: Interactive Pomodoro Focus Sprint -->
@@ -24,8 +26,7 @@
                     <!-- Section Title -->
                     <Grid Grid.Row="0" Margin="0,0,0,20">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="🍅 " FontSize="18" VerticalAlignment="Center" />
-                            <TextBlock Text="Interactive Focus Timer &amp; Nuclear Mode" FontSize="17" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="{loc:Loc Sched_HeroCardTitle}" FontSize="17" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
                         </StackPanel>
                         <Border HorizontalAlignment="Right" CornerRadius="12" Padding="12,5"
                                 Background="{Binding IsFocusActive, Converter={StaticResource BoolToVisConverter}}">
@@ -109,7 +110,7 @@
                         <!-- Right: Presets & Nuclear Mode Controls -->
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                             <!-- Preset Buttons -->
-                            <TextBlock Text="Select Sprint Preset:" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10" />
+                            <TextBlock Text="{loc:Loc Sched_SelectPreset}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,10" />
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,18">
                                 <Button Content="🍅 25m Pomodoro"
                                         Command="{Binding SelectPresetCommand}"
@@ -136,8 +137,8 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="⚡ Strict Nuclear Mode" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}" />
-                                        <TextBlock Text="Completely disables Master PIN pause and bypasses until the countdown finishes. No cheating." FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
+                                        <TextBlock Text="{loc:Loc Sched_StrictNuclear}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource WarningBrush}" />
+                                        <TextBlock Text="{loc:Loc Sched_StrictNuclearDesc}" FontSize="11" Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,0" />
                                     </StackPanel>
                                     <CheckBox Grid.Column="1"
                                               IsChecked="{Binding IsStrictNuclearMode}"
@@ -149,7 +150,7 @@
 
                             <!-- Start / End Buttons -->
                             <Grid>
-                                <Button Content="▶️ Start Focus Sprint"
+                                <Button Content="{loc:Loc Sched_StartSprintBtn}"
                                         Command="{Binding StartFocusSessionCommand}"
                                         Style="{StaticResource ModernPrimaryButton}"
                                         Height="44" FontSize="14"
@@ -173,8 +174,8 @@
                 <StackPanel>
                     <Grid Margin="0,0,0,16">
                         <StackPanel>
-                            <TextBlock Text="Custom Time Windows" FontSize="17" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
-                            <TextBlock Text="Create specialized blocking windows tailored to your work, study blocks, and evening routines." FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
+                            <TextBlock Text="{loc:Loc Sched_CustomWindows}" FontSize="17" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
+                            <TextBlock Text="{loc:Loc Sched_CustomSubtitle}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
                         </StackPanel>
                     </Grid>
 
@@ -182,7 +183,7 @@
                     <Border Background="#161928" BorderBrush="#2D284D" BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="0,0,0,16">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="💡" FontSize="15" Margin="0,0,10,0" VerticalAlignment="Center" />
-                            <TextBlock Text="How Schedules Work: Time windows define WHEN restrictions are active. After adding a time window (e.g. Sunday 00:00 - 17:00), select it from the 'Enforcement Schedule' dropdown on the Applications or Websites tab to assign which apps or websites will be locked."
+                            <TextBlock Text="{loc:Loc Sched_Explanation}"
                                        FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" MaxWidth="780" />
                         </StackPanel>
                     </Border>
@@ -199,7 +200,7 @@
 
                                 <!-- Name Input -->
                                 <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                                    <TextBlock Text="Schedule Name" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
+                                    <TextBlock Text="{loc:Loc Sched_Name}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
                                     <TextBox Text="{Binding NewScheduleName, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource ModernTextBox}"
                                              Height="36" />
@@ -207,7 +208,7 @@
 
                                 <!-- Start Time -->
                                 <StackPanel Grid.Column="1" Margin="0,0,12,0">
-                                    <TextBlock Text="Start (HH:mm)" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
+                                    <TextBlock Text="{loc:Loc Sched_StartPrompt}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
                                     <TextBox Text="{Binding NewScheduleStartTime, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource ModernTextBox}"
                                              Height="36" />
@@ -215,7 +216,7 @@
 
                                 <!-- End Time -->
                                 <StackPanel Grid.Column="2">
-                                    <TextBlock Text="End (HH:mm)" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
+                                    <TextBlock Text="{loc:Loc Sched_EndPrompt}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,4" />
                                     <TextBox Text="{Binding NewScheduleEndTime, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource ModernTextBox}"
                                              Height="36" />
@@ -230,7 +231,7 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <TextBlock Grid.Column="0" Text="Active Days:" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,16,0" />
+                                <TextBlock Grid.Column="0" Text="{loc:Loc Sched_Days}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,16,0" />
 
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                                     <CheckBox Content="Mon" IsChecked="{Binding DayMon}" Margin="0,0,12,0" Foreground="{StaticResource TextPrimaryBrush}" />
@@ -243,7 +244,7 @@
                                 </StackPanel>
 
                                 <Button Grid.Column="2"
-                                        Content="➕ Add Time Window"
+                                        Content="{loc:Loc Sched_AddWindowBtn}"
                                         Command="{Binding CreateCustomScheduleCommand}"
                                         Style="{StaticResource ModernPrimaryButton}"
                                         Height="36" Padding="16,6" />
@@ -376,8 +377,8 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="Standard Preset Schedules" FontSize="17" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
-                            <TextBlock Text="Built-in business and focus presets evaluated by the guardian engine." FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
+                            <TextBlock Text="{loc:Loc Sched_StandardPresets}" FontSize="17" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
+                            <TextBlock Text="{loc:Loc Sched_StandardPresetsDesc}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
                         </StackPanel>
 
                         <!-- System Clock -->

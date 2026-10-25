@@ -3,14 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:loc="clr-namespace:AppBlocker.UI.Services"
              mc:Ignorable="d" 
+             FontFamily="Segoe UI, Nirmala UI, Iskoola Pota, sans-serif"
              d:DesignHeight="750" d:DesignWidth="950">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="24">
             <!-- Header -->
             <StackPanel Margin="0,0,0,20">
-                <TextBlock Text="Web Filtering Engine" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
-                <TextBlock Text="Block distracting websites and web domains across all browsers at the Windows OS network level." FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
+                <TextBlock Text="{loc:Loc Web_Title}" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" />
+                <TextBlock Text="{loc:Loc Web_Subtitle}" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
             </StackPanel>
 
             <!-- Status Banner with 30-sec Auto-Dismiss & Manual Close -->
@@ -53,7 +55,7 @@
             <!-- Add Website Card -->
             <Border Style="{StaticResource ModernCard}" Margin="0,0,0,24">
                 <StackPanel>
-                    <TextBlock Text="Add New Website Filter &amp; Redirect Rule" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,16" />
+                    <TextBlock Text="{loc:Loc Web_AddNew}" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" Margin="0,0,0,16" />
 
                     <!-- Two-column input for Domain and Redirect URL -->
                     <Grid Margin="0,0,0,14">
@@ -65,10 +67,10 @@
 
                         <!-- URL or Domain input with watermark hint -->
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="Target Domain / URL to Intercept (e.g. youtube.com, tiktok.com)" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                            <TextBlock Text="{loc:Loc Web_DomainName}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
                             <Grid>
                                 <TextBox Text="{Binding NewUrlOrDomain, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38" />
-                                <TextBlock Text="e.g. facebook.com, youtube.com, or nano.gov"
+                                <TextBlock Text="{loc:Loc Web_DomainHint}"
                                            IsHitTestVisible="False"
                                            FontSize="12" Foreground="{StaticResource TextMutedBrush}"
                                            VerticalAlignment="Center" Margin="14,0,0,0"
@@ -78,10 +80,10 @@
 
                         <!-- Redirect URL input (Optional) with watermark hint -->
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Redirect To URL (Optional, e.g. https://en.wikipedia.org)" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                            <TextBlock Text="{loc:Loc Web_RedirectUrl}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
                             <Grid>
                                 <TextBox Text="{Binding NewRedirectUrl, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38" />
-                                <TextBlock Text="Optional redirect URL (e.g. https://wikipedia.org)"
+                                <TextBlock Text="{loc:Loc Web_RedirectHint}"
                                            IsHitTestVisible="False"
                                            FontSize="12" Foreground="{StaticResource TextMutedBrush}"
                                            VerticalAlignment="Center" Margin="14,0,0,0"
@@ -100,7 +102,7 @@
 
                         <!-- Schedule Selector -->
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="Enforcement Schedule" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                            <TextBlock Text="{loc:Loc Web_Schedule}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
                             <ComboBox ItemsSource="{Binding ScheduleOptions}" SelectedItem="{Binding SelectedSchedule}" Style="{StaticResource ModernComboBox}" Height="38" />
                         </StackPanel>
 
@@ -109,7 +111,7 @@
 
                         <!-- Add Rule Button -->
                         <StackPanel Grid.Column="2" VerticalAlignment="Bottom">
-                            <Button Content="➕ Add Website Rule" Command="{Binding AddRuleCommand}" Style="{StaticResource ModernPrimaryButton}" Height="38" />
+                            <Button Content="{loc:Loc Web_BtnAdd}" Command="{Binding AddRuleCommand}" Style="{StaticResource ModernPrimaryButton}" Height="38" />
                         </StackPanel>
                     </Grid>
                 </StackPanel>
@@ -119,7 +121,7 @@
             <Border Style="{StaticResource ModernCard}">
                 <StackPanel>
                     <Grid Margin="0,0,0,16">
-                        <TextBlock Text="Active Blocked Domains" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                        <TextBlock Text="{loc:Loc Web_ActiveRules}" FontSize="16" FontWeight="SemiBold" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" />
                         <TextBlock Text="{Binding Rules.Count, StringFormat='Total Domains: {0}'}" FontSize="12" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Right" VerticalAlignment="Center" />
                     </Grid>
 
@@ -191,7 +193,7 @@
 
                                         <!-- Delete Button -->
                                         <Button Grid.Column="3"
-                                                Content="🗑️ Delete"
+                                                Content="{loc:Loc Apps_Delete}"
                                                 Command="{Binding DataContext.RemoveRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                 CommandParameter="{Binding}"
                                                 Style="{StaticResource ModernDangerButton}"
@@ -203,7 +205,7 @@
                     </ItemsControl>
 
                     <!-- Empty state text: now hides when Rules.Count > 0 -->
-                    <TextBlock Text="No website rules configured yet. Add a domain above to start filtering."
+                    <TextBlock Text="{loc:Loc Web_NoRules}"
                                Foreground="{StaticResource TextMutedBrush}" FontSize="13" TextAlignment="Center" Margin="0,20,0,10"
                                Visibility="{Binding Rules.Count, Converter={StaticResource InverseBoolToVisConverter}}" />
                 </StackPanel>

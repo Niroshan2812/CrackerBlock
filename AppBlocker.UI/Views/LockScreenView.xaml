@@ -3,7 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:loc="clr-namespace:AppBlocker.UI.Services"
              mc:Ignorable="d" 
+             FontFamily="Segoe UI, Nirmala UI, Iskoola Pota, sans-serif"
              d:DesignHeight="700" d:DesignWidth="1000">
     <Grid Background="{StaticResource BgMainBrush}">
         <!-- Subtle radial glow background -->
@@ -16,13 +18,27 @@
             </Border.Resources>
             
             <StackPanel>
+                <!-- Top Row: Language Toggle Selector -->
+                <Grid Margin="0,0,0,10">
+                    <Button HorizontalAlignment="Right"
+                            Command="{Binding ToggleLanguageCommand}"
+                            Style="{StaticResource ModernSecondaryButton}"
+                            Padding="8,3" Height="28"
+                            ToolTip="{Binding Loc.SwitchLanguageTooltip}">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="🌐 " FontSize="11" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Loc.CurrentLanguageDisplay}" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+
                 <!-- Shield Icon & Header -->
                 <Border Width="64" Height="64" CornerRadius="32" Background="#261E40" BorderBrush="{StaticResource AccentPurpleBrush}" BorderThickness="2" HorizontalAlignment="Center" Margin="0,0,0,16">
                     <TextBlock Text="🔒" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Border>
 
-                <TextBlock Text="APPBLOCKER" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" />
-                <TextBlock Text="Windows App &amp; Web Guardian" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,4,0,20" />
+                <TextBlock Text="{loc:Loc Brand_Title}" FontSize="22" FontWeight="Bold" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                <TextBlock Text="{loc:Loc Brand_Subtitle}" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,4,0,20" />
 
                 <!-- Mode Indicator -->
                 <Border CornerRadius="8" Padding="12,8" Margin="0,0,0,20" HorizontalAlignment="Stretch">
@@ -39,11 +55,11 @@
                     <TextBlock HorizontalAlignment="Center" TextAlignment="Center" FontSize="12">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
-                                <Setter Property="Text" Value="Enter Master PIN to Unlock Dashboard" />
+                                <Setter Property="Text" Value="{loc:Loc Lock_EnterMasterPin}" />
                                 <Setter Property="Foreground" Value="{StaticResource AccentPurpleBrush}" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsSetupMode}" Value="True">
-                                        <Setter Property="Text" Value="INITIAL SETUP: Create your Master PIN (4-8 digits)" />
+                                        <Setter Property="Text" Value="{loc:Loc Lock_SetupTitle}" />
                                         <Setter Property="Foreground" Value="{StaticResource AccentCyanBrush}" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -53,7 +69,7 @@
                 </Border>
 
                 <!-- PIN Input Box -->
-                <TextBlock Text="Master PIN" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                <TextBlock Text="{loc:Loc Lock_MasterPin}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
                 <Grid Margin="0,0,0,12">
                     <PasswordBox x:Name="MasterPasswordBox"
                                  FontSize="20"
@@ -77,7 +93,7 @@
                             Width="34" Height="34"
                             Style="{StaticResource ModernSecondaryButton}"
                             Padding="0"
-                            ToolTip="Toggle PIN Masking">
+                            ToolTip="{loc:Loc Lock_ShowPin}">
                         <TextBlock FontSize="14">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
@@ -95,7 +111,7 @@
 
                 <!-- Confirm PIN Box (Shown in Setup Mode only) -->
                 <StackPanel Visibility="{Binding IsSetupMode, Converter={StaticResource BoolToVisConverter}}">
-                    <TextBlock Text="Confirm Master PIN" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                    <TextBlock Text="{loc:Loc Lock_ConfirmPin}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
                     <Grid Margin="0,0,0,16">
                         <PasswordBox x:Name="ConfirmPasswordBox"
                                      FontSize="20"
@@ -119,7 +135,7 @@
                                 Width="34" Height="34"
                                 Style="{StaticResource ModernSecondaryButton}"
                                 Padding="0"
-                                ToolTip="Toggle PIN Masking">
+                                ToolTip="{loc:Loc Lock_ShowPin}">
                             <TextBlock FontSize="14">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
@@ -201,10 +217,10 @@
                         <TextBlock FontSize="14" FontWeight="Bold">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="Unlock Dashboard" />
+                                    <Setter Property="Text" Value="{loc:Loc Lock_UnlockBtn}" />
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsSetupMode}" Value="True">
-                                            <Setter Property="Text" Value="Establish Master PIN &amp; Unlock" />
+                                            <Setter Property="Text" Value="{loc:Loc Lock_SetupBtn}" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -214,10 +230,12 @@
                 </Button>
 
                 <!-- Security Footer -->
-                <TextBlock Text="Protected by BCrypt (WorkFactor: 11). Audit logs record unauthorized attempts."
+                <TextBlock Text="{loc:Loc Lock_SecurityNotice}"
                            FontSize="11"
                            Foreground="{StaticResource TextMutedBrush}"
                            HorizontalAlignment="Center"
+                           TextWrapping="Wrap"
+                           TextAlignment="Center"
                            Margin="0,16,0,0" />
             </StackPanel>
         </Border>
