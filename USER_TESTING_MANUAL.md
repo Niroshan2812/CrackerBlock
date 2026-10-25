@@ -55,7 +55,25 @@ CrackerBlock supports **English** and **Sinhala (සිංහල)** with on-the-
 
 ---
 
-## 🧪 3. End-User Testing Scenarios & Checklist
+## ⏳ 3. 3-Day Evaluation Period & License Activation (3-දින පරීක්ෂණ කාලය)
+
+To protect testing distributions, CrackerBlock v1.0 includes an automatic **3-Day (72-Hour) Evaluation Period**:
+
+* **Full Functionality During Testing**: For 3 days from initial installation, all features (Applications, Websites, Schedules, Safe Child Mode, Anti-Tamper) are 100% active.
+* **Live Countdown Badge**: A live evaluation timer is displayed in the bottom sidebar:
+  * e.g., `⏱️ 2d 18h remaining` (or `⏱️ දින 2, පැය 18 ඉතිරිව ඇත` in Sinhala).
+* **Automatic Expiration Lockdown**: Once the 72 hours elapse, the application locks down completely and presents the **Evaluation Period Expired** screen. The user cannot access dashboard tabs or configure rules without an activation key.
+* **Tester Safety**: When the evaluation expires, background process termination and web blocking automatically pause so the tester's computer is never locked out of regular apps.
+* **Anti-Clock-Tampering**: Setting the system clock backwards triggers anti-tamper detection and locks the evaluation.
+* **How to Unlock / Activate**:
+  * On the lock screen, enter a license key:
+    * **Master Evaluation Key**: `CB-TEST-2026-UNLK`
+    * Or a device-specific key generated from the displayed **Device ID**.
+  * Click **"🔑 Activate License"** to permanently lift the restriction.
+
+---
+
+## 🧪 4. End-User Testing Scenarios & Checklist
 
 Use this checklist to test each feature systematically:
 

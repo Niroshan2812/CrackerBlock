@@ -69,6 +69,21 @@ namespace AppBlocker.UI.ViewModels
         private string _watchdogStatusText = "Dual-Process Guard Active (Immune to taskkill)";
 
         [ObservableProperty]
+        private string _trialRemainingText = "";
+
+        [ObservableProperty]
+        private string _machineId = "";
+
+        [ObservableProperty]
+        private string _licenseKeyInput = "";
+
+        [ObservableProperty]
+        private string _licenseStatusMessage = "";
+
+        [ObservableProperty]
+        private bool _isLicenseSuccess;
+
+        [ObservableProperty]
         private string _currentPinInput = string.Empty;
 
         [ObservableProperty]
@@ -222,6 +237,9 @@ namespace AppBlocker.UI.ViewModels
         {
             try
             {
+                MachineId = TrialLicenseService.Instance.MachineId;
+                TrialRemainingText = TrialLicenseService.Instance.GetFormattedRemainingTime(LocalizationManager.Instance.IsSinhala);
+
                 var isAvailable = await _ipcClient.IsServiceAvailableAsync();
                 IsServiceConnected = isAvailable;
 
@@ -527,6 +545,34 @@ namespace AppBlocker.UI.ViewModels
             finally
             {
                 IsDiagnosticsRunning = false;
+            }
+        }
+        [RelayCommand]
+        public void ActivateLicense()
+        {
+            if (string.IsNullOrWhiteSpace(LicenseKeyInput))
+            {
+                LicenseStatusMessage = LocalizationManager.Instance.IsSinhala
+                    ? "කරුණාකර වලංගු බලපත්‍ර යතුරක් ඇතුළත් කරන්න."
+                    : "Please enter an activation key.";
+                IsLicenseSuccess = false;
+                return;
+            }
+
+            if (TrialLicenseService.Instance.TryActivate(LicenseKeyInput, out var msg))
+            {
+                IsLicenseSuccess = true;
+                LicenseStatusMessage = LocalizationManager.Instance.IsSinhala
+                    ? "බලපත්‍රය සාර්ථකව සක්‍රිය කරන ලදී!"
+                    : "License successfully activated!";
+                TrialRemainingText = TrialLicenseService.Instance.GetFormattedRemainingTime(LocalizationManager.Instance.IsSinhala);
+            }
+            else
+            {
+                IsLicenseSuccess = false;
+                LicenseStatusMessage = LocalizationManager.Instance.IsSinhala
+                    ? "අවලංගු බලපත්‍ර යතුරකි."
+                    : "Invalid activation key.";
             }
         }
     }

@@ -35,6 +35,24 @@ namespace AppBlocker.UI.ViewModels
         [ObservableProperty]
         private double _sidebarWidth = 260;
 
+        [ObservableProperty]
+        private bool _isTrialExpired;
+
+        [ObservableProperty]
+        private string _trialRemainingText = "";
+
+        [ObservableProperty]
+        private string _machineId = "";
+
+        [ObservableProperty]
+        private string _activationKeyInput = "";
+
+        [ObservableProperty]
+        private string _activationMessage = "";
+
+        [ObservableProperty]
+        private bool _isActivationSuccess;
+
         [RelayCommand]
         public void ToggleSidebar()
         {
@@ -84,15 +102,26 @@ namespace AppBlocker.UI.ViewModels
             LogsVM = new LogsViewModel();
             SettingsVM = new SettingsViewModel(_ipcClient, _pinService, Lock);
 
-            // Listen to language changes to update localized dynamic status badges
-            LocalizationManager.Instance.LanguageChanged += _ => UpdateServiceStatusBadge();
+            MachineId = TrialLicenseService.Instance.MachineId;
+            UpdateTrialState();
 
-            // Heartbeat to check if AppBlocker.Service daemon is online
+            // Listen to language changes to update localized dynamic status badges
+            LocalizationManager.Instance.LanguageChanged += _ =>
+            {
+                UpdateServiceStatusBadge();
+                UpdateTrialState();
+            };
+
+            // Heartbeat to check if AppBlocker.Service daemon is online and track trial status
             _heartbeatTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(3)
             };
-            _heartbeatTimer.Tick += async (s, e) => await CheckServiceStatusAsync();
+            _heartbeatTimer.Tick += async (s, e) =>
+            {
+                UpdateTrialState();
+                await CheckServiceStatusAsync();
+            };
             _heartbeatTimer.Start();
         }
 
@@ -246,6 +275,47 @@ namespace AppBlocker.UI.ViewModels
             {
                 ServiceStatusBadge = LocalizationManager.Instance.Get("Status_ServiceOffline");
             }
+        }
+
+        public void UpdateTrialState()
+        {
+            IsTrialExpired = TrialLicenseService.Instance.IsTrialExpired;
+            TrialRemainingText = TrialLicenseService.Instance.GetFormattedRemainingTime(LocalizationManager.Instance.IsSinhala);
+        }
+
+        [RelayCommand]
+        public void ActivateLicense()
+        {
+            if (string.IsNullOrWhiteSpace(ActivationKeyInput))
+            {
+                ActivationMessage = LocalizationManager.Instance.IsSinhala
+                    ? "කරුණාකර වලංගු බලපත්‍ර යතුරක් ඇතුළත් කරන්න."
+                    : "Please enter a valid activation key.";
+                IsActivationSuccess = false;
+                return;
+            }
+
+            if (TrialLicenseService.Instance.TryActivate(ActivationKeyInput, out var msg))
+            {
+                IsActivationSuccess = true;
+                ActivationMessage = LocalizationManager.Instance.IsSinhala
+                    ? "බලපත්‍රය සාර්ථකව සක්‍රිය කරන ලදී! සියලු සීමා ඉවත් කර ඇත."
+                    : "License activated successfully! All restrictions lifted.";
+                UpdateTrialState();
+            }
+            else
+            {
+                IsActivationSuccess = false;
+                ActivationMessage = LocalizationManager.Instance.IsSinhala
+                    ? "අවලංගු බලපත්‍ර යතුරකි. කරුණාකර නැවත පරීක්ෂා කරන්න."
+                    : "Invalid activation key. Please verify and try again.";
+            }
+        }
+
+        [RelayCommand]
+        public void ExitApplication()
+        {
+            System.Windows.Application.Current.Shutdown();
         }
     }
 }

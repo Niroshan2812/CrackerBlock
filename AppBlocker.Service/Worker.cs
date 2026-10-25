@@ -191,12 +191,15 @@ namespace AppBlocker.Service
                     catch { }
                 }
 
-                _appLockingEngine.IsPaused = _isBlockingPaused;
-                _webFilteringEngine.IsPaused = _isBlockingPaused;
-                _httpsProxyEngine.IsPaused = _isBlockingPaused;
+                bool isTrialExpired = TrialLicenseService.Instance.IsTrialExpired;
+                bool shouldPause = _isBlockingPaused || isTrialExpired;
 
-                // Milestone 2 Enforcement: Process polling every 1.5 seconds
-                if (!_isBlockingPaused)
+                _appLockingEngine.IsPaused = shouldPause;
+                _webFilteringEngine.IsPaused = shouldPause;
+                _httpsProxyEngine.IsPaused = shouldPause;
+
+                // Milestone 2 Enforcement: Process polling every 1.5 seconds (only when not paused and trial active)
+                if (!shouldPause)
                 {
                     try
                     {

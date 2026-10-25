@@ -265,6 +265,16 @@
                     <!-- Bottom Sidebar: Service Daemon Status & Lock Action -->
                     <Border Grid.Row="2" Padding="12" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="0,1,0,0">
                         <StackPanel>
+                            <!-- 3-Day Testing Trial Badge -->
+                            <Border CornerRadius="6" Padding="8,5" Margin="0,0,0,8" Background="#1E1A33" BorderBrush="#4A3474" BorderThickness="1"
+                                    ToolTip="{loc:Loc Trial_ActiveStatus}">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                    <TextBlock Text="⏱️" FontSize="11" Margin="2,0,6,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding TrialRemainingText}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource AccentPurpleBrush}" TextTrimming="CharacterEllipsis" Width="170"
+                                               Visibility="{Binding DataContext.IsSidebarCollapsed, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBoolToVisConverter}}" />
+                                </StackPanel>
+                            </Border>
+
                             <!-- Service Status Badge -->
                             <Border CornerRadius="6" Padding="8,6" Margin="0,0,0,10"
                                     ToolTip="{Binding ServiceStatusBadge}">
@@ -361,6 +371,97 @@
                     <views:SettingsView DataContext="{Binding SettingsVM}" />
                 </Grid>
             </Grid>
+        </Grid>
+
+        <!-- 3. Trial Expired Lockdown Overlay (Shown when 3-day evaluation expires) -->
+        <Grid Visibility="{Binding IsTrialExpired, Converter={StaticResource BoolToVisConverter}}"
+              Background="#F20B0F19"
+              Panel.ZIndex="9999">
+            <Border HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Width="520" Style="{StaticResource ModernCard}"
+                    Padding="32" Margin="20">
+                <Border.Resources>
+                    <DropShadowEffect x:Key="ShadowEffect" BlurRadius="50" Color="#E11D48" Opacity="0.35" ShadowDepth="0" />
+                </Border.Resources>
+                <StackPanel>
+                    <!-- Shield / Hourglass Icon -->
+                    <Border Width="64" Height="64" CornerRadius="32" Background="#2A121D" BorderBrush="{StaticResource DangerBrush}" BorderThickness="2" HorizontalAlignment="Center" Margin="0,0,0,16">
+                        <TextBlock Text="⏳" FontSize="26" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+
+                    <TextBlock Text="{loc:Loc Trial_ExpiredTitle}" FontSize="22" FontWeight="Bold" Foreground="{StaticResource DangerBrush}" HorizontalAlignment="Center" TextAlignment="Center" />
+                    <TextBlock Text="{loc:Loc Trial_ExpiredDesc}" FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="0,10,0,20" LineHeight="18" />
+
+                    <!-- Machine Device ID -->
+                    <Border Background="#161B26" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="0,0,0,16">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{loc:Loc Trial_DeviceId}" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            <TextBlock Grid.Column="1" Text="{Binding MachineId}" FontSize="13" FontWeight="Bold" Foreground="{StaticResource AccentCyanBrush}" VerticalAlignment="Center" HorizontalAlignment="Right" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Activation Key Input -->
+                    <TextBlock Text="{loc:Loc Trial_KeyPrompt}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                    <TextBox Text="{Binding ActivationKeyInput, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource ModernTextBox}"
+                             FontSize="14" FontWeight="SemiBold"
+                             Padding="12,10" Margin="0,0,0,12" />
+
+                    <!-- Activation Feedback Message -->
+                    <Border CornerRadius="6" Padding="10,8" Margin="0,0,0,16"
+                            Visibility="{Binding ActivationMessage, Converter={StaticResource StringNotEmptyToVisConverter}}">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Background" Value="#3B1D25" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsActivationSuccess}" Value="True">
+                                        <Setter Property="Background" Value="#223326" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <TextBlock Text="{Binding ActivationMessage}" FontSize="12" TextAlignment="Center" TextWrapping="Wrap">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsActivationSuccess}" Value="True">
+                                            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Border>
+
+                    <!-- Actions: Activate & Exit -->
+                    <Grid Margin="0,4,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0" Command="{Binding ActivateLicenseCommand}" Style="{StaticResource ModernPrimaryButton}" Height="40" FontSize="13">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <TextBlock Text="🔑 " FontSize="14" />
+                                <TextBlock Text="{loc:Loc Trial_ActivateBtn}" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Grid.Column="2" Command="{Binding ExitApplicationCommand}" Style="{StaticResource ModernSecondaryButton}" Height="40" FontSize="13">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <TextBlock Text="🚪 " FontSize="14" />
+                                <TextBlock Text="{loc:Loc Trial_ExitBtn}" FontWeight="SemiBold" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </StackPanel>
+            </Border>
         </Grid>
     </Grid>
 </Window>
