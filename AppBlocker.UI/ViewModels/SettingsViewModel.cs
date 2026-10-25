@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading;
 using System.Threading.Tasks;
 using AppBlocker.Core.Diagnostics;
 using AppBlocker.Core.Security;
@@ -15,6 +16,7 @@ namespace AppBlocker.UI.ViewModels
         private readonly IpcClientService _ipcClient;
         private readonly IPinSecurityService _pinService;
         private readonly Action _onLockDashboard;
+        private CancellationTokenSource? _generalStatusCts;
 
         [ObservableProperty]
         private bool _isServiceConnected;
@@ -63,6 +65,35 @@ namespace AppBlocker.UI.ViewModels
 
         [ObservableProperty]
         private string _generalStatusMessage = string.Empty;
+
+        partial void OnGeneralStatusMessageChanged(string value)
+        {
+            _generalStatusCts?.Cancel();
+            if (!string.IsNullOrWhiteSpace(value))
+            {
+                _generalStatusCts = new CancellationTokenSource();
+                var token = _generalStatusCts.Token;
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        await Task.Delay(30000, token);
+                        if (!token.IsCancellationRequested)
+                        {
+                            GeneralStatusMessage = string.Empty;
+                        }
+                    }
+                    catch { }
+                });
+            }
+        }
+
+        [RelayCommand]
+        private void DismissGeneralStatus()
+        {
+            _generalStatusCts?.Cancel();
+            GeneralStatusMessage = string.Empty;
+        }
 
         // Safe Child Mode (Parental Shield)
         [ObservableProperty]

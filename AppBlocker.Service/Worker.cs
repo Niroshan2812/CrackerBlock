@@ -483,10 +483,26 @@ namespace AppBlocker.Service
                         return IpcResponse.Error(request.Id, "Invalid process name for temporary unlock.");
                     }
 
-                    var minutes = payload.DurationMinutes > 0 ? payload.DurationMinutes : 15;
+                    await using var db = AppBlockerDbContext.CreateContext();
+
+                    if (payload.DurationMinutes <= 0)
+                    {
+                        _appLockingEngine.TemporaryUnlockApp(payload.ProcessName, TimeSpan.Zero);
+
+                        db.Logs.Add(new SystemLog
+                        {
+                            Timestamp = DateTime.UtcNow,
+                            EventType = "App Relocked",
+                            Description = $"Process '{payload.ProcessName}' relocked by user."
+                        });
+                        await db.SaveChangesAsync();
+
+                        return IpcResponse.Ok(request.Id, $"Process '{payload.ProcessName}' is now relocked and actively guarded.");
+                    }
+
+                    var minutes = payload.DurationMinutes;
                     _appLockingEngine.TemporaryUnlockApp(payload.ProcessName, TimeSpan.FromMinutes(minutes));
 
-                    await using var db = AppBlockerDbContext.CreateContext();
                     db.Logs.Add(new SystemLog
                     {
                         Timestamp = DateTime.UtcNow,

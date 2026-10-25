@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
-             d:DesignHeight="700" d:DesignWidth="900">
+             d:DesignHeight="750" d:DesignWidth="950">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="24">
             <!-- Header -->
@@ -13,7 +13,7 @@
                 <TextBlock Text="Block distracting websites and web domains across all browsers at the Windows OS network level." FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
             </StackPanel>
 
-            <!-- Status Banner -->
+            <!-- Status Banner with 30-sec Auto-Dismiss & Manual Close -->
             <Border CornerRadius="8" Padding="14,10" Margin="0,0,0,20"
                     Visibility="{Binding StatusMessage, Converter={StaticResource StringNotEmptyToVisConverter}}">
                 <Border.Style>
@@ -26,18 +26,28 @@
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
-                <TextBlock Text="{Binding StatusMessage}" FontSize="13">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsSuccessMessage}" Value="False">
-                                    <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="{Binding StatusMessage}" FontSize="13" VerticalAlignment="Center">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{StaticResource SuccessBrush}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsSuccessMessage}" Value="False">
+                                        <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <Button Grid.Column="1" Content="✕" Command="{Binding DismissStatusCommand}"
+                            Style="{StaticResource ModernSecondaryButton}"
+                            Padding="8,2" Height="26" FontSize="11" Margin="10,0,0,0"
+                            ToolTip="Dismiss notification" />
+                </Grid>
             </Border>
 
             <!-- Add Website Card -->
@@ -53,16 +63,30 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <!-- URL or Domain input -->
+                        <!-- URL or Domain input with watermark hint -->
                         <StackPanel Grid.Column="0">
                             <TextBlock Text="Target Domain / URL to Intercept (e.g. youtube.com, tiktok.com)" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
-                            <TextBox Text="{Binding NewUrlOrDomain, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38" />
+                            <Grid>
+                                <TextBox Text="{Binding NewUrlOrDomain, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38" />
+                                <TextBlock Text="e.g. facebook.com, youtube.com, or nano.gov"
+                                           IsHitTestVisible="False"
+                                           FontSize="12" Foreground="{StaticResource TextMutedBrush}"
+                                           VerticalAlignment="Center" Margin="14,0,0,0"
+                                           Visibility="{Binding NewUrlOrDomain, Converter={StaticResource StringEmptyToVisConverter}}" />
+                            </Grid>
                         </StackPanel>
 
-                        <!-- Redirect URL input (Optional) -->
+                        <!-- Redirect URL input (Optional) with watermark hint -->
                         <StackPanel Grid.Column="2">
                             <TextBlock Text="Redirect To URL (Optional, e.g. https://en.wikipedia.org)" FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
-                            <TextBox Text="{Binding NewRedirectUrl, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38" />
+                            <Grid>
+                                <TextBox Text="{Binding NewRedirectUrl, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource ModernTextBox}" Height="38" />
+                                <TextBlock Text="Optional redirect URL (e.g. https://wikipedia.org)"
+                                           IsHitTestVisible="False"
+                                           FontSize="12" Foreground="{StaticResource TextMutedBrush}"
+                                           VerticalAlignment="Center" Margin="14,0,0,0"
+                                           Visibility="{Binding NewRedirectUrl, Converter={StaticResource StringEmptyToVisConverter}}" />
+                            </Grid>
                         </StackPanel>
                     </Grid>
 
@@ -132,9 +156,18 @@
                                                 <TextBlock Text="{Binding RedirectUrl}" FontSize="11" Foreground="{StaticResource AccentCyanBrush}" TextTrimming="CharacterEllipsis" MaxWidth="450" />
                                             </StackPanel>
 
+                                            <!-- Multi-Hop Chained Redirect Display (e.g., nano.gov -> wiki.com -> youtube.com) -->
+                                            <Border CornerRadius="4" Padding="8,4" Margin="0,6,0,0" Background="#1D1933" BorderBrush="{StaticResource AccentCyanBrush}" BorderThickness="1" HorizontalAlignment="Left"
+                                                    Visibility="{Binding IsChainedRedirect, Converter={StaticResource BoolToVisConverter}}">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="🔗 Multi-Hop Chained Redirect: " FontSize="11" Foreground="{StaticResource AccentPurpleBrush}" FontWeight="Bold" />
+                                                    <TextBlock Text="{Binding ChainVisualText}" FontSize="11" Foreground="{StaticResource AccentCyanBrush}" FontWeight="Bold" />
+                                                </StackPanel>
+                                            </Border>
+
                                             <!-- When Direct Block (no redirect) -->
                                             <TextBlock Text="🚫 Direct Block (Enforced by Local HTTPS Engine)" FontSize="11" Foreground="{StaticResource TextMutedBrush}"
-                                                       Visibility="{Binding RedirectUrl, Converter={StaticResource StringEmptyToVisConverter}}" />
+                                                       Visibility="{Binding RedirectUrl, Converter={StaticResource StringEmptyToVisConverter}}" Margin="0,2,0,0" />
                                         </StackPanel>
 
                                         <!-- Status Toggle -->
@@ -169,6 +202,7 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
+                    <!-- Empty state text: now hides when Rules.Count > 0 -->
                     <TextBlock Text="No website rules configured yet. Add a domain above to start filtering."
                                Foreground="{StaticResource TextMutedBrush}" FontSize="13" TextAlignment="Center" Margin="0,20,0,10"
                                Visibility="{Binding Rules.Count, Converter={StaticResource InverseBoolToVisConverter}}" />

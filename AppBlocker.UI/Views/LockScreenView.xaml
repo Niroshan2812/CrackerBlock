@@ -54,22 +54,86 @@
 
                 <!-- PIN Input Box -->
                 <TextBlock Text="Master PIN" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
-                <TextBox Text="{Binding PinInput, UpdateSourceTrigger=PropertyChanged}"
-                         FontSize="20"
-                         FontWeight="Bold"
-                         HorizontalContentAlignment="Center"
-                         Style="{StaticResource ModernTextBox}"
-                         Margin="0,0,0,12" />
-
-                <!-- Confirm PIN Box (Shown in Setup Mode only) -->
-                <StackPanel Visibility="{Binding IsSetupMode, Converter={StaticResource BoolToVisConverter}}">
-                    <TextBlock Text="Confirm Master PIN" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
-                    <TextBox Text="{Binding ConfirmPinInput, UpdateSourceTrigger=PropertyChanged}"
+                <Grid Margin="0,0,0,12">
+                    <PasswordBox x:Name="MasterPasswordBox"
+                                 FontSize="20"
+                                 FontWeight="Bold"
+                                 HorizontalContentAlignment="Center"
+                                 Style="{StaticResource ModernPasswordBox}"
+                                 Padding="38,10,38,10"
+                                 Visibility="{Binding IsPinVisible, Converter={StaticResource InverseBoolToVisConverter}}" />
+                    <TextBox x:Name="MasterTextBox"
+                             Text="{Binding PinInput, UpdateSourceTrigger=PropertyChanged}"
                              FontSize="20"
                              FontWeight="Bold"
                              HorizontalContentAlignment="Center"
                              Style="{StaticResource ModernTextBox}"
-                             Margin="0,0,0,16" />
+                             Padding="38,10,38,10"
+                             Visibility="{Binding IsPinVisible, Converter={StaticResource BoolToVisConverter}}" />
+                    <Button Command="{Binding TogglePinVisibilityCommand}"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Margin="0,0,8,0"
+                            Width="34" Height="34"
+                            Style="{StaticResource ModernSecondaryButton}"
+                            Padding="0"
+                            ToolTip="Toggle PIN Masking">
+                        <TextBlock FontSize="14">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="👁️" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsPinVisible}" Value="True">
+                                            <Setter Property="Text" Value="🙈" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Button>
+                </Grid>
+
+                <!-- Confirm PIN Box (Shown in Setup Mode only) -->
+                <StackPanel Visibility="{Binding IsSetupMode, Converter={StaticResource BoolToVisConverter}}">
+                    <TextBlock Text="Confirm Master PIN" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,6" />
+                    <Grid Margin="0,0,0,16">
+                        <PasswordBox x:Name="ConfirmPasswordBox"
+                                     FontSize="20"
+                                     FontWeight="Bold"
+                                     HorizontalContentAlignment="Center"
+                                     Style="{StaticResource ModernPasswordBox}"
+                                     Padding="38,10,38,10"
+                                     Visibility="{Binding IsConfirmPinVisible, Converter={StaticResource InverseBoolToVisConverter}}" />
+                        <TextBox x:Name="ConfirmTextBox"
+                                 Text="{Binding ConfirmPinInput, UpdateSourceTrigger=PropertyChanged}"
+                                 FontSize="20"
+                                 FontWeight="Bold"
+                                 HorizontalContentAlignment="Center"
+                                 Style="{StaticResource ModernTextBox}"
+                                 Padding="38,10,38,10"
+                                 Visibility="{Binding IsConfirmPinVisible, Converter={StaticResource BoolToVisConverter}}" />
+                        <Button Command="{Binding ToggleConfirmPinVisibilityCommand}"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Margin="0,0,8,0"
+                                Width="34" Height="34"
+                                Style="{StaticResource ModernSecondaryButton}"
+                                Padding="0"
+                                ToolTip="Toggle PIN Masking">
+                            <TextBlock FontSize="14">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="👁️" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsConfirmPinVisible}" Value="True">
+                                                <Setter Property="Text" Value="🙈" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Button>
+                    </Grid>
                 </StackPanel>
 
                 <!-- Status / Error Notification -->

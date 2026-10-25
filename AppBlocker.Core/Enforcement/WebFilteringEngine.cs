@@ -246,6 +246,12 @@ namespace AppBlocker.Core.Enforcement
                 clean = clean.Substring(4);
             }
 
+            // If user entered only service name (e.g. 'facebook' or 'youtube'), normalize to .com
+            if (!clean.Contains('.') && !clean.Contains(' ') && clean.Length > 0)
+            {
+                clean += ".com";
+            }
+
             return clean;
         }
 

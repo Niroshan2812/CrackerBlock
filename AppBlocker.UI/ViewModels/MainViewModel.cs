@@ -29,6 +29,19 @@ namespace AppBlocker.UI.ViewModels
         [ObservableProperty]
         private string _serviceStatusBadge = "Connecting to Service...";
 
+        [ObservableProperty]
+        private bool _isSidebarCollapsed;
+
+        [ObservableProperty]
+        private double _sidebarWidth = 260;
+
+        [RelayCommand]
+        public void ToggleSidebar()
+        {
+            IsSidebarCollapsed = !IsSidebarCollapsed;
+            SidebarWidth = IsSidebarCollapsed ? 68 : 260;
+        }
+
         public IPinSecurityService PinService => _pinService;
         public IpcClientService IpcClient => _ipcClient;
 

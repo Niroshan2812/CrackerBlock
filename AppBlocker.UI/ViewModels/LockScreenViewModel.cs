@@ -21,6 +21,24 @@ namespace AppBlocker.UI.ViewModels
         private string _confirmPinInput = string.Empty;
 
         [ObservableProperty]
+        private bool _isPinVisible;
+
+        [ObservableProperty]
+        private bool _isConfirmPinVisible;
+
+        [RelayCommand]
+        private void TogglePinVisibility()
+        {
+            IsPinVisible = !IsPinVisible;
+        }
+
+        [RelayCommand]
+        private void ToggleConfirmPinVisibility()
+        {
+            IsConfirmPinVisible = !IsConfirmPinVisible;
+        }
+
+        [ObservableProperty]
         private string _statusMessage = string.Empty;
 
         [ObservableProperty]

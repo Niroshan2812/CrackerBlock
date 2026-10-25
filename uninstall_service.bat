@@ -31,7 +31,7 @@ reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\Internet Settings" /v Pr
 echo [5/6] Removing AppBlocker Root CA Certificate...
 powershell -Command "Get-ChildItem Cert:\LocalMachine\Root, Cert:\CurrentUser\Root -ErrorAction SilentlyContinue | Where-Object { $_.Subject -like '*AppBlocker*' } | Remove-Item -Force -ErrorAction SilentlyContinue" >nul 2>&1
 
-echo [6/6] Restoring Policies & Flushing DNS...
+echo [6/7] Restoring Policies & Flushing DNS...
 reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Policies\System" /v DisableTaskMgr /f >nul 2>&1
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System" /v DisableTaskMgr /f >nul 2>&1
 reg delete "HKLM\Software\Policies\Google\Chrome" /v IncognitoModeAvailability /f >nul 2>&1
@@ -44,9 +44,14 @@ reg delete "HKLM\Software\Policies\Microsoft\Edge" /v BuiltInDnsClientEnabled /f
 reg delete "HKLM\Software\Policies\Microsoft\Edge" /v ProxyMode /f >nul 2>&1
 ipconfig /flushdns >nul
 
+echo [7/7] Purging AppBlocker Database & Master Credentials (%ProgramData%\AppBlocker)...
+if exist "%ProgramData%\AppBlocker" (
+    rmdir /S /Q "%ProgramData%\AppBlocker" >nul 2>&1
+)
+
 echo.
 echo ========================================================
-echo  AppBlocker Service uninstalled and all OS settings
-echo  cleanly restored to Windows factory defaults!
+echo  AppBlocker Service uninstalled, database cleanly purged,
+echo  and all OS settings restored to Windows factory defaults!
 echo ========================================================
 pause

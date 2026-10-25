@@ -13,11 +13,21 @@
                 <TextBlock Text="Manage background service daemon, anti-tamper policies, and Master PIN credentials." FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" />
             </StackPanel>
 
-            <!-- Status Banner -->
+            <!-- Status Banner (with 30-sec Auto-Dismiss & Manual Close) -->
             <Border CornerRadius="8" Padding="14,10" Margin="0,0,0,20"
                     Visibility="{Binding GeneralStatusMessage, Converter={StaticResource StringNotEmptyToVisConverter}}"
                     Background="#1E3326">
-                <TextBlock Text="{Binding GeneralStatusMessage}" Foreground="{StaticResource SuccessBrush}" FontSize="13" />
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="{Binding GeneralStatusMessage}" Foreground="{StaticResource SuccessBrush}" FontSize="13" VerticalAlignment="Center" />
+                    <Button Grid.Column="1" Content="✕" Command="{Binding DismissGeneralStatusCommand}"
+                            Style="{StaticResource ModernSecondaryButton}"
+                            Padding="8,2" Height="26" FontSize="11" Margin="10,0,0,0"
+                            ToolTip="Dismiss notification" />
+                </Grid>
             </Border>
 
             <!-- 🩺 1-Click System Diagnostics & Self-Healing Wizard Card -->

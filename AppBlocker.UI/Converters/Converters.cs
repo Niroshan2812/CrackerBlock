@@ -11,7 +11,14 @@ namespace AppBlocker.UI.Converters
 
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            bool b = value is true;
+            bool b = value switch
+            {
+                bool boolVal => boolVal,
+                int intVal => intVal > 0,
+                long longVal => longVal > 0,
+                System.Collections.ICollection coll => coll.Count > 0,
+                _ => false
+            };
             if (Invert) b = !b;
             return b ? Visibility.Visible : Visibility.Collapsed;
         }

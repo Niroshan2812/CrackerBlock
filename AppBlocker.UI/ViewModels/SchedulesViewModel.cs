@@ -4,11 +4,13 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Threading;
+using AppBlocker.Core.Data;
 using AppBlocker.Core.IPC;
 using AppBlocker.Core.Models;
 using AppBlocker.UI.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppBlocker.UI.ViewModels
 {
@@ -30,6 +32,8 @@ namespace AppBlocker.UI.ViewModels
         public string DaysOfWeek { get; set; } = string.Empty;
         public bool IsActive { get; set; } = true;
         public bool IsActiveNow { get; set; }
+        public string LinkedTargetsSummary { get; set; } = string.Empty;
+        public int LinkedTargetsCount { get; set; }
     }
 
     public partial class SchedulesViewModel : ObservableObject
@@ -59,6 +63,24 @@ namespace AppBlocker.UI.ViewModels
 
         [ObservableProperty]
         private bool _isStrictNuclearMode;
+
+        public bool CanEndFocusSession => !(IsFocusActive && IsStrictNuclearMode);
+
+        public string EndFocusButtonContent => (IsFocusActive && IsStrictNuclearMode)
+            ? "🔒 NUCLEAR LOCK ENGAGED (Session Cannot Be Stopped)"
+            : "⏹️ End Focus Session";
+
+        partial void OnIsFocusActiveChanged(bool value)
+        {
+            OnPropertyChanged(nameof(CanEndFocusSession));
+            OnPropertyChanged(nameof(EndFocusButtonContent));
+        }
+
+        partial void OnIsStrictNuclearModeChanged(bool value)
+        {
+            OnPropertyChanged(nameof(CanEndFocusSession));
+            OnPropertyChanged(nameof(EndFocusButtonContent));
+        }
 
         [ObservableProperty]
         private string _remainingTimeDisplay = "25:00";
@@ -202,9 +224,45 @@ namespace AppBlocker.UI.ViewModels
             try
             {
                 var list = await _ipcClient.GetCustomSchedulesAsync();
+
+                // Query database to find which Apps and Websites are linked to each schedule
+                List<AppRule> appRules = new();
+                List<WebRule> webRules = new();
+                try
+                {
+                    await using var db = AppBlockerDbContext.CreateContext();
+                    appRules = await db.AppRules.ToListAsync();
+                    webRules = await db.WebRules.ToListAsync();
+                }
+                catch { }
+
                 var items = new ObservableCollection<CustomScheduleDisplayItem>();
                 foreach (var s in list)
                 {
+                    var linkedApps = appRules
+                        .Where(a => a.ScheduleType.Equals(s.Name, StringComparison.OrdinalIgnoreCase))
+                        .Select(a => a.ProcessName)
+                        .ToList();
+
+                    var linkedWebs = webRules
+                        .Where(w => w.ScheduleType.Equals(s.Name, StringComparison.OrdinalIgnoreCase))
+                        .Select(w => w.UrlOrKeyword)
+                        .ToList();
+
+                    var totalLinked = linkedApps.Count + linkedWebs.Count;
+                    string summary;
+                    if (totalLinked > 0)
+                    {
+                        var parts = new List<string>();
+                        if (linkedApps.Count > 0) parts.Add($"💻 Apps: {string.Join(", ", linkedApps)}");
+                        if (linkedWebs.Count > 0) parts.Add($"🌐 Web: {string.Join(", ", linkedWebs)}");
+                        summary = "🎯 " + string.Join(" | ", parts);
+                    }
+                    else
+                    {
+                        summary = "ℹ️ No rules assigned yet. Select this schedule when adding an App or Website.";
+                    }
+
                     items.Add(new CustomScheduleDisplayItem
                     {
                         Id = s.Id,
@@ -213,7 +271,9 @@ namespace AppBlocker.UI.ViewModels
                         EndTime = s.EndTime,
                         DaysOfWeek = s.DaysOfWeek,
                         IsActive = s.IsActive,
-                        IsActiveNow = s.IsActiveNow
+                        IsActiveNow = s.IsActiveNow,
+                        LinkedTargetsSummary = summary,
+                        LinkedTargetsCount = totalLinked
                     });
                 }
                 CustomScheduleItems = items;
@@ -326,6 +386,13 @@ namespace AppBlocker.UI.ViewModels
         [RelayCommand]
         private async Task StopFocusSessionAsync()
         {
+            if (IsStrictNuclearMode && IsFocusActive)
+            {
+                IsFocusError = true;
+                FocusStatusMessage = "🔒 Strict Nuclear Lock is active! Sessions cannot be stopped early until the countdown completes.";
+                return;
+            }
+
             IsFocusError = false;
             try
             {

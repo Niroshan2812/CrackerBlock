@@ -88,6 +88,13 @@ namespace AppBlocker.Core.Enforcement
             }
 
             var cleanName = Path.GetFileNameWithoutExtension(processName).Trim().ToLowerInvariant();
+            if (duration <= TimeSpan.Zero)
+            {
+                _temporarilyUnlockedApps.TryRemove(cleanName, out _);
+                _logger?.Invoke($"Process '{cleanName}' relocked immediately.");
+                return;
+            }
+
             var expiry = DateTime.UtcNow.Add(duration);
             _temporarilyUnlockedApps[cleanName] = expiry;
             _logger?.Invoke($"Process '{cleanName}' temporarily unlocked until {expiry:yyyy-MM-dd HH:mm:ss} UTC.");

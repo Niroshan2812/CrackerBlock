@@ -155,11 +155,13 @@
                                         Height="44" FontSize="14"
                                         Visibility="{Binding IsFocusActive, Converter={StaticResource InverseBoolToVisConverter}}" />
 
-                                <Button Content="⏹️ End Focus Session"
+                                <Button Content="{Binding EndFocusButtonContent}"
                                         Command="{Binding StopFocusSessionCommand}"
+                                        IsEnabled="{Binding CanEndFocusSession}"
                                         Style="{StaticResource ModernDangerButton}"
-                                        Height="44" FontSize="14"
-                                        Visibility="{Binding IsFocusActive, Converter={StaticResource BoolToVisConverter}}" />
+                                        Height="44" FontSize="13"
+                                        Visibility="{Binding IsFocusActive, Converter={StaticResource BoolToVisConverter}}"
+                                        ToolTip="Strict Nuclear Mode prevents early cancellation when active" />
                             </Grid>
                         </StackPanel>
                     </Grid>
@@ -175,6 +177,15 @@
                             <TextBlock Text="Create specialized blocking windows tailored to your work, study blocks, and evening routines." FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,2,0,0" />
                         </StackPanel>
                     </Grid>
+
+                    <!-- How Time Windows Work Guidance Banner -->
+                    <Border Background="#161928" BorderBrush="#2D284D" BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="0,0,0,16">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="💡" FontSize="15" Margin="0,0,10,0" VerticalAlignment="Center" />
+                            <TextBlock Text="How Schedules Work: Time windows define WHEN restrictions are active. After adding a time window (e.g. Sunday 00:00 - 17:00), select it from the 'Enforcement Schedule' dropdown on the Applications or Websites tab to assign which apps or websites will be locked."
+                                       FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" TextWrapping="Wrap" MaxWidth="780" />
+                        </StackPanel>
+                    </Border>
 
                     <!-- Add Schedule Form -->
                     <Border Background="{StaticResource BgSidebarBrush}" BorderBrush="{StaticResource BorderCardBrush}" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,16">
@@ -272,6 +283,8 @@
                                                     <TextBlock Text="{Binding DaysOfWeek}" FontSize="10" Foreground="{StaticResource AccentPurpleBrush}" FontWeight="SemiBold" />
                                                 </Border>
                                             </StackPanel>
+                                            <!-- Linked targets summary -->
+                                            <TextBlock Text="{Binding LinkedTargetsSummary}" FontSize="11" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,4,0,0" TextWrapping="Wrap" />
                                         </StackPanel>
 
                                         <!-- Active State Pill -->

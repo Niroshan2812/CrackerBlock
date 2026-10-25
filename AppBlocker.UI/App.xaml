@@ -157,12 +157,13 @@
         </Style>
 
         <!-- Modern TextBox Style -->
+        <!-- Modern TextBox Style -->
         <Style x:Key="ModernTextBox" TargetType="TextBox">
-            <Setter Property="Background" Value="{StaticResource BgCardBrush}" />
+            <Setter Property="Background" Value="#131522" />
             <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
             <Setter Property="CaretBrush" Value="{StaticResource AccentPurpleBrush}" />
-            <Setter Property="BorderBrush" Value="{StaticResource BorderCardBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="#2D324E" />
+            <Setter Property="BorderThickness" Value="1.5" />
             <Setter Property="FontSize" Value="13" />
             <Setter Property="Padding" Value="12,10" />
             <Setter Property="Template">
@@ -173,11 +174,15 @@
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="8">
-                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" />
+                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" Margin="2,0" />
                         </Border>
                         <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#3F466E" />
+                            </Trigger>
                             <Trigger Property="IsFocused" Value="True">
                                 <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentPurpleBrush}" />
+                                <Setter TargetName="border" Property="Background" Value="#161928" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -187,11 +192,11 @@
 
         <!-- Modern PasswordBox Style -->
         <Style x:Key="ModernPasswordBox" TargetType="PasswordBox">
-            <Setter Property="Background" Value="{StaticResource BgCardBrush}" />
+            <Setter Property="Background" Value="#131522" />
             <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
             <Setter Property="CaretBrush" Value="{StaticResource AccentPurpleBrush}" />
-            <Setter Property="BorderBrush" Value="{StaticResource BorderCardBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="#2D324E" />
+            <Setter Property="BorderThickness" Value="1.5" />
             <Setter Property="FontSize" Value="14" />
             <Setter Property="Padding" Value="12,10" />
             <Setter Property="Template">
@@ -202,11 +207,79 @@
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="8">
-                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" />
+                            <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" Margin="2,0" />
                         </Border>
                         <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="#3F466E" />
+                            </Trigger>
                             <Trigger Property="IsFocused" Value="True">
                                 <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource AccentPurpleBrush}" />
+                                <Setter TargetName="border" Property="Background" Value="#161928" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Modern ComboBox ToggleButton Template -->
+        <ControlTemplate x:Key="ComboBoxToggleButtonTemplate" TargetType="ToggleButton">
+            <Border x:Name="templateRoot"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="8"
+                    SnapsToDevicePixels="true">
+                <Border x:Name="splitBorder"
+                        Width="28"
+                        HorizontalAlignment="Right"
+                        Margin="0"
+                        BorderBrush="Transparent"
+                        BorderThickness="0">
+                    <Path x:Name="arrow"
+                          HorizontalAlignment="Center"
+                          VerticalAlignment="Center"
+                          Data="F1 M 0,0 L 4,4 L 8,0 Z"
+                          Fill="{StaticResource TextSecondaryBrush}" />
+                </Border>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsMouseOver" Value="true">
+                    <Setter TargetName="templateRoot" Property="BorderBrush" Value="{StaticResource AccentPurpleBrush}" />
+                    <Setter TargetName="arrow" Property="Fill" Value="{StaticResource TextPrimaryBrush}" />
+                </Trigger>
+                <Trigger Property="IsChecked" Value="true">
+                    <Setter TargetName="templateRoot" Property="BorderBrush" Value="{StaticResource AccentPurpleBrush}" />
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <!-- Modern ComboBoxItem Style -->
+        <Style x:Key="ModernComboBoxItem" TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border x:Name="ItemBorder"
+                                Background="{TemplateBinding Background}"
+                                BorderThickness="0"
+                                CornerRadius="6"
+                                Padding="{TemplateBinding Padding}"
+                                Margin="4,2">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="#2A2444" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource AccentPurpleBrush}" />
+                                <Setter Property="Foreground" Value="White" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -216,12 +289,117 @@
 
         <!-- Modern ComboBox Style -->
         <Style x:Key="ModernComboBox" TargetType="ComboBox">
-            <Setter Property="Background" Value="{StaticResource BgCardBrush}" />
+            <Setter Property="Background" Value="#131522" />
             <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
-            <Setter Property="BorderBrush" Value="{StaticResource BorderCardBrush}" />
-            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="#2D324E" />
+            <Setter Property="BorderThickness" Value="1.5" />
             <Setter Property="FontSize" Value="13" />
             <Setter Property="Padding" Value="12,8" />
+            <Setter Property="ItemContainerStyle" Value="{StaticResource ModernComboBoxItem}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid x:Name="templateRoot" SnapsToDevicePixels="true">
+                            <ToggleButton x:Name="toggleButton"
+                                          Background="{TemplateBinding Background}"
+                                          BorderBrush="{TemplateBinding BorderBrush}"
+                                          BorderThickness="{TemplateBinding BorderThickness}"
+                                          ClickMode="Press"
+                                          Focusable="false"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                                          Template="{StaticResource ComboBoxToggleButtonTemplate}" />
+                            <ContentPresenter x:Name="contentPresenter"
+                                              Content="{TemplateBinding SelectionBoxItem}"
+                                              ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}"
+                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                              ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              IsHitTestVisible="false"
+                                              Margin="{TemplateBinding Padding}"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                            <Popup x:Name="PART_Popup"
+                                   AllowsTransparency="true"
+                                   IsOpen="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource Mode=TemplatedParent}}"
+                                   Placement="Bottom"
+                                   Margin="1"
+                                   PopupAnimation="Slide">
+                                <Border x:Name="dropDownBorder"
+                                        Background="#181B2B"
+                                        BorderBrush="#2D324E"
+                                        BorderThickness="1.5"
+                                        CornerRadius="8"
+                                        MinWidth="{Binding ActualWidth, ElementName=templateRoot}"
+                                        MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                                        Padding="4">
+                                    <Border.Effect>
+                                        <DropShadowEffect BlurRadius="16" Color="#000000" Opacity="0.5" ShadowDepth="4" />
+                                    </Border.Effect>
+                                    <ScrollViewer x:Name="DropDownScrollViewer" CanContentScroll="true" Focusable="false">
+                                        <ItemsPresenter x:Name="ItemsPresenter" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Global CheckBox Style (Sleek Glassmorphic Toggle Box) -->
+        <Style TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{StaticResource TextPrimaryBrush}" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Padding" Value="8,0,0,0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Grid Background="Transparent">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Border x:Name="checkBorder"
+                                    Grid.Column="0"
+                                    Width="18"
+                                    Height="18"
+                                    CornerRadius="4"
+                                    Background="#131522"
+                                    BorderBrush="#2D324E"
+                                    BorderThickness="1.5"
+                                    VerticalAlignment="Center">
+                                <Path x:Name="checkMark"
+                                      Data="M 3,8 L 7,12 L 15,4"
+                                      Stroke="White"
+                                      StrokeThickness="2"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      Visibility="Collapsed" />
+                            </Border>
+                            <ContentPresenter Grid.Column="1"
+                                              Margin="{TemplateBinding Padding}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="checkBorder" Property="BorderBrush" Value="{StaticResource AccentPurpleBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="checkBorder" Property="Background" Value="{StaticResource AccentPurpleBrush}" />
+                                <Setter TargetName="checkBorder" Property="BorderBrush" Value="{StaticResource AccentPurpleHoverBrush}" />
+                                <Setter TargetName="checkMark" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="checkBorder" Property="Opacity" Value="0.4" />
+                                <Setter Property="Foreground" Value="{StaticResource TextMutedBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
 
         <!-- Modern Card Border -->
